@@ -1,0 +1,1 @@
+<div><h5>{{ $seller->name }}</h5><p>{{ $seller->email }}<br>{{ $seller->phone }}</p><p><strong>{{ translate('Shop') }}:</strong> {{ $seller->shop?->name }}<br><strong>{{ translate('Status') }}:</strong> {{ $seller->shop?->status?->value ?? $seller->shop?->status }}</p></div>

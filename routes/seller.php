@@ -159,12 +159,13 @@ Route::group([
     Route::post('/seller-store', [AdminSellerController::class, 'seller_store'])->name('seller.store');
     Route::get('/seller-edit/{id}', [AdminSellerController::class, 'seller_edit'])->name('seller.edit');
     Route::post('/seller-update', [AdminSellerController::class, 'seller_update'])->name('seller.update');
+    Route::patch('/sellers/{shop}/status', [AdminSellerController::class, 'updateStatus'])->name('seller.status');
     Route::post('/sellers/approval', [AdminSellerController::class, 'update_seller_approval'])->name('sellers.approval');
     Route::post('/shop/publish', [AdminSellerController::class, 'update_shop_publish'])->name('shop.publish');
     Route::post('/sellers/profile_modal', [AdminSellerController::class, 'profile_modal'])->name('sellers.profile_modal');
     Route::post('/sellers/payment_modal', [AdminSellerController::class, 'payment_modal'])->name('sellers.payment_modal');
-    Route::get('/sellers/destroy/{id}', [AdminSellerController::class, 'seller_destroy'])->name('seller.destroy');
-    Route::get('/sellers/login/{id}', [AdminSellerController::class, 'login_as_seller'])->name('seller.login_as_seller');
+    Route::delete('/sellers/{id}', [AdminSellerController::class, 'seller_destroy'])->name('seller.destroy');
+    Route::post('/sellers/login/{id}', [AdminSellerController::class, 'login_as_seller'])->name('seller.login_as_seller');
     Route::post('/bulk-seller-delete', [AdminSellerController::class, 'bulk_seller_delete'])->name('bulk-seller-delete');
 
 
@@ -172,8 +173,8 @@ Route::group([
     Route::get('/sellers/verification-form', [AdminSellerController::class, 'seller_verification_form'])->name('seller_verification_form');
     Route::post('/sellers/verification-form', [AdminSellerController::class, 'seller_verification_form_update'])->name('seller_verification_form_update');
     Route::get('/sellers/verification/{id}', [AdminSellerController::class, 'show_verification_request'])->name('show_verification_request');
-    Route::get('/sellers/approve/{id}', [AdminSellerController::class, 'approve_seller'])->name('sellers.approve');
-    Route::get('/sellers/reject/{id}', [AdminSellerController::class, 'reject_seller'])->name('sellers.reject');
+    Route::post('/sellers/approve/{id}', [AdminSellerController::class, 'approve_seller'])->name('sellers.approve');
+    Route::post('/sellers/reject/{id}', [AdminSellerController::class, 'reject_seller'])->name('sellers.reject');
     
     // end of seller verification form
 

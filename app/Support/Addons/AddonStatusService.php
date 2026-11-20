@@ -2,14 +2,19 @@
 
 namespace App\Support\Addons;
 
-use App\Models\Addon;
 use App\Contracts\AddonStatusManager;
+use App\Models\Addon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class AddonStatusService implements AddonStatusManager
 {
     private const CACHE_KEY = 'addons.registry';
+
+    private const NATIVE_ADDONS = [
+        'multi_vendor' => \App\Addons\Multivendor\MultivendorAddon::class,
+        'multivendor' => \App\Addons\Multivendor\MultivendorAddon::class,
+    ];
 
     public function all(): Collection
     {
@@ -35,6 +40,10 @@ class AddonStatusService implements AddonStatusManager
     {
         if ($identifier === '') {
             return false;
+        }
+
+        if (isset(self::NATIVE_ADDONS[$identifier]) && class_exists(self::NATIVE_ADDONS[$identifier])) {
+            return true;
         }
 
         return $this->all()
