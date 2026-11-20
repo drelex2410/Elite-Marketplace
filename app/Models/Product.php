@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductReviewStatus;
 use Illuminate\Database\Eloquent\Model;
 use App;
 
@@ -17,6 +18,9 @@ class Product extends Model
         'approved' => 'boolean',
         'today_deal' => 'boolean',
         'earn_point' => 'decimal:6',
+        'review_status' => ProductReviewStatus::class,
+        'submitted_for_review_at' => 'datetime',
+        'reviewed_at' => 'datetime',
     ];
 
     public function getTranslation($field = '', $lang = false)
@@ -140,6 +144,23 @@ class Product extends Model
 
     public function scopeFrontendVisible($query)
     {
-        return $query->where('published', 1)->where('approved', 1);
+        return $query
+            ->where('published', 1)
+            ->where('approved', 1)
+            ->whereHas('shop', function ($shopQuery) {
+                $shopQuery
+                    ->where('published', 1)
+                    ->where('approval', 1)
+                    ->where('verification_status', 1)
+                    ->when(
+                        \Illuminate\Support\Facades\Schema::hasColumn('shops', 'status'),
+                        fn ($query) => $query->where('status', 'active')
+                    );
+            });
+    }
+
+    public function scopeOwnedByShop($query, int $shopId)
+    {
+        return $query->where('shop_id', $shopId);
     }
 }

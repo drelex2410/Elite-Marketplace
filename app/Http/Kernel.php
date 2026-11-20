@@ -6,6 +6,7 @@ use App\Http\Middleware\ApiLocalization;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsDeliveryBoy;
 use App\Http\Middleware\IsSeller;
+use App\Http\Middleware\EnsureSellerOperational;
 use App\Http\Middleware\IsUnbanned;
 use App\Http\Middleware\IsUser;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -64,6 +65,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'admin' => IsAdmin::class,
         'seller' => IsSeller::class,
+        'seller.active' => EnsureSellerOperational::class,
         'user' => IsUser::class,
         'deliveryboy' => IsDeliveryBoy::class,
         'unbanned' => IsUnbanned::class,

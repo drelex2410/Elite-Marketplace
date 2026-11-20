@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
@@ -23,7 +26,12 @@ class RouteServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
-		//
+		RateLimiter::for('seller-registration', function (Request $request) {
+			return [
+				Limit::perMinute(5)->by($request->ip()),
+				Limit::perDay(20)->by($request->ip()),
+			];
+		});
 
 		parent::boot();
 	}

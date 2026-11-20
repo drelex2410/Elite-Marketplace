@@ -2,12 +2,25 @@
 
 namespace App\Models;
 
+use App\Enums\ShopStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Shop extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'approval' => 'boolean',
+        'published' => 'boolean',
+        'verification_status' => 'boolean',
+        'status' => ShopStatus::class,
+        'approved_at' => 'datetime',
+        'suspended_at' => 'datetime',
+        'package_invalid_at' => 'date',
+        'commission' => 'decimal:2',
+        'current_balance' => 'decimal:2',
+    ];
 
     public function user()
     {
@@ -67,5 +80,18 @@ class Shop extends Model
     public function followers()
     {
         return $this->belongsToMany(User::class, 'shop_followers', 'shop_id', 'user_id');
+    }
+
+    public function scopeOwnedBy($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->published
+            && $this->approval
+            && $this->verification_status
+            && ($this->status === null || $this->status === ShopStatus::Active);
     }
 }
