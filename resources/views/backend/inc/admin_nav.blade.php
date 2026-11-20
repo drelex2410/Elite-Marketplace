@@ -44,12 +44,14 @@
                 <div class="admin-product-search" data-admin-product-search>
                     <form class="admin-product-search__form" autocomplete="off">
                         <input
+                            id="admin-product-search-desktop"
+                            name="product_search"
                             type="search"
                             class="form-control admin-product-search__input"
                             placeholder="{{ translate('Search products') }}"
                             aria-label="{{ translate('Search products') }}"
                         >
-                        <button type="submit" class="btn btn-outline-secondary border-gray-300 admin-product-search__button">
+                        <button type="submit" class="btn btn-outline-secondary border-gray-300 admin-product-search__button" aria-label="{{ translate('Search products') }}">
                             <i class="las la-search opacity-60"></i>
                         </button>
                     </form>
@@ -89,12 +91,14 @@
                 <div class="admin-product-search admin-product-search--mobile" data-admin-product-search>
                     <form class="admin-product-search__form" autocomplete="off">
                         <input
+                            id="admin-product-search-mobile"
+                            name="product_search_mobile"
                             type="search"
                             class="form-control admin-product-search__input"
                             placeholder="{{ translate('Search products') }}"
                             aria-label="{{ translate('Search products') }}"
                         >
-                        <button type="submit" class="btn btn-outline-secondary border-gray-300 admin-product-search__button">
+                        <button type="submit" class="btn btn-outline-secondary border-gray-300 admin-product-search__button" aria-label="{{ translate('Search products') }}">
                             <i class="las la-search opacity-60"></i>
                         </button>
                     </form>
@@ -345,6 +349,7 @@
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
     (function () {
         var endpoint = @json(route('product.search'));
         var placeholderImage = @json(static_asset('assets/img/placeholder.jpg'));
@@ -479,4 +484,5 @@
             });
         });
     })();
+    });
 </script>

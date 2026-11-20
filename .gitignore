@@ -8,6 +8,7 @@ error_log
 deployment/
 .phpunit.result.cache
 shop.sql
+database/exports/
 temp/
 public/uploads/all/*.mp4
 public/uploads/all/*.mov

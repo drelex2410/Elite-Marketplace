@@ -6,10 +6,10 @@
         <swiper 
             v-else
             :slides-per-view="1" 
-            :autoplay="carouselOption.autoplay"
-            :loop="true"
+            :autoplay="banners.length > 1 ? carouselOption.autoplay : false"
+            :loop="banners.length > 1"
             :modules="modules"
-            :pagination="{ clickable: true }"
+            :pagination="banners.length > 1 ? { clickable: true } : false"
             class="hero-swiper"
         >
             <swiper-slide v-for="(banner, i) in banners" :key="i">

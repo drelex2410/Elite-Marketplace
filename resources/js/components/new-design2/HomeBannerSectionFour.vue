@@ -6,8 +6,11 @@
 
         <div v-else class="banner-container">
             <div v-if="swiperBanners.length || newsletterBanner" class="banner-grid">
-                <swiper v-if="swiperBanners.length" :slides-per-view="1" :space-between="0" :loop="true" :autoplay="carouselOption.autoplay"
-                    :modules="modules" :pagination="{ clickable: true }" class="main-swiper">
+                <swiper v-if="swiperBanners.length" :slides-per-view="1" :space-between="0"
+                    :loop="swiperBanners.length > 1"
+                    :autoplay="swiperBanners.length > 1 ? carouselOption.autoplay : false"
+                    :modules="modules"
+                    :pagination="swiperBanners.length > 1 ? { clickable: true } : false" class="main-swiper">
                     <swiper-slide v-for="(banner, i) in swiperBanners" :key="i">
                         <router-link v-if="isClickable(banner)" :to="banner.link" class="banner-slide">
                             <img :src="banner.img" :alt="`Banner ${i + 1}`" @error="imageFallback($event)" />
@@ -46,7 +49,8 @@
             </div>
 
             <div class="testimonials-section">
-                <swiper :slides-per-view="1" :space-between="30" :loop="true" :autoplay="testimonialAutoplay"
+                <swiper :slides-per-view="1" :space-between="30" :loop="testimonials.length > 3"
+                    :autoplay="testimonials.length > 1 ? testimonialAutoplay : false"
                     :modules="modules" :navigation="true" class="testimonials-swiper"
                     :breakpoints="testimonialBreakpoints">
                     <swiper-slide v-for="(testimonial, i) in testimonials" :key="i">

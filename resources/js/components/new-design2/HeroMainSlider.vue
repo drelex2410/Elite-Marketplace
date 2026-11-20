@@ -8,8 +8,10 @@
       </div>
       <div class="gutters-0" v-else>
         <div class="px-0">
-          <swiper :spaceBetween="0" :centeredSlides="true" :autoplay="carouselOption.autoplay"
-            :pagination="{ clickable: true }" :navigation="true" :loop="true" :modules="modules"
+          <swiper :spaceBetween="0" :centeredSlides="true"
+            :autoplay="sliders.one.length > 1 ? carouselOption.autoplay : false"
+            :pagination="sliders.one.length > 1 ? { clickable: true } : false"
+            :navigation="sliders.one.length > 1" :loop="sliders.one.length > 1" :modules="modules"
             class="mySwiper main-swiper">
             <swiper-slide v-for="(slider, i) in sliders.one" :key="i">
               <router-link v-if="isClickable(slider)" :to="slider.link" class="slide-link">

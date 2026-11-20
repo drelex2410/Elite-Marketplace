@@ -17,8 +17,8 @@
                         <form class="pad-hor" method="POST" role="form" action="{{ route('login') }}">
                             @csrf
                             <div class="form-group">
-                                <label class="mb-1">{{ translate('Email') }}</label>
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required autofocus placeholder="{{ translate('Email') }}">
+                                <label class="mb-1" for="email">{{ translate('Email') }}</label>
+                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="{{ translate('Email') }}">
                                 @if ($errors->has('email'))
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('email') }}</strong>
@@ -26,8 +26,8 @@
                                 @endif
                             </div>
                             <div class="form-group">
-                                <label class="mb-1">{{ translate('Password') }}</label>
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required placeholder="{{ translate('Password') }}">
+                                <label class="mb-1" for="password">{{ translate('Password') }}</label>
+                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required autocomplete="current-password" placeholder="{{ translate('Password') }}">
                                 @if ($errors->has('password'))
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('password') }}</strong>
