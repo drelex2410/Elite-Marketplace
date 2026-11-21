@@ -1,6 +1,7 @@
 <?php
 
 use App\Addons\Multivendor\Http\Controllers\Admin\CommissionController as AdminCommissionController;
+use App\Addons\Multivendor\Http\Controllers\Admin\ProductReviewController as AdminProductReviewController;
 use App\Addons\Multivendor\Http\Controllers\Admin\SellerController as AdminSellerController;
 use App\Addons\Multivendor\Http\Controllers\Admin\SellerPackageController as AdminSellerPackageController;
 use App\Addons\Multivendor\Http\Controllers\Admin\SellerPayoutController as AdminSellerPayoutController;
@@ -48,17 +49,17 @@ Route::group([
     Route::resource('/shop', ShopController::class);
 
     // Seller products
-    Route::group(['prefix' => 'product'], function () {
+    Route::group(['prefix' => 'product', 'middleware' => 'seller.active'], function () {
         Route::get('', [SellerController::class, 'seller_products_list'])->name('products');
         Route::get('/upload', [SellerController::class, 'show_product_upload_form'])->name('products.create');
         Route::post('/store', [SellerController::class, 'seller_product_store'])->name('product.store');
-        Route::get('/{id}/edit', [SellerController::class, 'show_product_edit_form'])->name('products.edit');
-        Route::post('/product/update/{id}', [SellerController::class, 'seller_product_update'])->name('product.update');
-        Route::get('/{id}', [SellerController::class, 'seller_product_show'])->name('product.show');
         Route::post('/published', [SellerController::class, 'seller_product_published'])->name('product.published');
-        Route::get('/duplicate/{id}', [SellerController::class, 'seller_product_duplicate'])->name('product.duplicate');
-        Route::get('/destroy/{id}', [SellerController::class, 'seller_product_destroy'])->name('product.destroy');
+        Route::post('/duplicate/{id}', [SellerController::class, 'seller_product_duplicate'])->whereNumber('id')->name('product.duplicate');
+        Route::delete('/{id}', [SellerController::class, 'seller_product_destroy'])->whereNumber('id')->name('product.destroy');
         Route::post('/bulk-product-delete', [SellerController::class, 'bulk_product_delete'])->name('bulk-product-delete');
+        Route::get('/{id}/edit', [SellerController::class, 'show_product_edit_form'])->name('products.edit');
+        Route::post('/{id}', [SellerController::class, 'seller_product_update'])->whereNumber('id')->name('product.update');
+        Route::get('/{id}', [SellerController::class, 'seller_product_show'])->whereNumber('id')->name('product.show');
 
         Route::post('/new-attribte', [ProductController::class, 'new_attribute'])->name('product.new_attribute');
         Route::post('/get-attribte-value', [ProductController::class, 'get_attribute_values'])->name('product.get_attribute_values');
@@ -180,6 +181,8 @@ Route::group([
 
 
     Route::get('/seller-products/{product_type}', [AdminSellerController::class, 'seller_products'])->name('seller_products.index');
+    Route::get('/seller-product-reviews', [AdminProductReviewController::class, 'index'])->name('seller_product_reviews.index');
+    Route::patch('/seller-product-reviews/{product}', [AdminProductReviewController::class, 'update'])->name('seller_product_reviews.update');
     Route::get('/seller-orders', [AdminSellerController::class, 'seller_orders'])->name('seller_orders.index');
     Route::get('/seller-order/show/{id}', [AdminSellerController::class, 'seller_order_show'])->name('seller_orders.show');
 

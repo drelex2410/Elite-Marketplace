@@ -17,6 +17,7 @@ use App\Models\ProductVariationCombination;
 use App\Contracts\ApplicationBootstrap;
 use App\Models\Shop;
 use App\Models\ShopBrand;
+use App\Services\Sellers\ProductReviewService;
 use App\Utility\CategoryUtility;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -189,6 +190,12 @@ class ProductController extends Controller
         $product->description       = $request->description;
         $product->published         = (int) $request->status;
         $product->approved          = $this->resolveApprovalStateForSave();
+        if (auth()->user()->user_type === 'seller') {
+            app(ProductReviewService::class)->prepareSellerSave(
+                $product,
+                $request->string('review_action')->toString()
+            );
+        }
         $product->digital           = 0;
         $product->main_category     = $request->main_category;
 
@@ -359,7 +366,10 @@ class ProductController extends Controller
         cache_clear();
 
         flash(translate('Product has been inserted successfully'))->success();
-        return redirect()->route('product.index');
+
+        return redirect()->route(
+            auth()->user()->user_type === 'seller' ? 'seller.products' : 'product.index'
+        );
     }
 
     /**
@@ -454,7 +464,12 @@ class ProductController extends Controller
         $product->photos            = $request->photos;
         $product->thumbnail_img     = $request->thumbnail_img;
         $product->published         = (int) $request->status;
-        if (auth()->user()->user_type !== 'seller' && (int) $product->published === 1) {
+        if (auth()->user()->user_type === 'seller') {
+            app(ProductReviewService::class)->prepareSellerSave(
+                $product,
+                $request->string('review_action')->toString()
+            );
+        } elseif ((int) $product->published === 1) {
             $product->approved = 1;
         }
         $product->digital           = 0;
@@ -666,7 +681,10 @@ class ProductController extends Controller
         ]);
 
         flash(translate('Product has been updated successfully'))->success();
-        return redirect()->route('product.index');
+
+        return redirect()->route(
+            auth()->user()->user_type === 'seller' ? 'seller.products' : 'product.index'
+        );
     }
 
     /**
@@ -692,7 +710,9 @@ class ProductController extends Controller
 
         if (Product::destroy($id)) {
             flash(translate('Product has been deleted successfully'))->success();
-            return redirect()->route('product.index');
+            return redirect()->route(
+                auth()->user()->user_type === 'seller' ? 'seller.products' : 'product.index'
+            );
         } else {
             flash(translate('Something went wrong'))->error();
             return back();
@@ -710,6 +730,9 @@ class ProductController extends Controller
         $product = Product::find($id);
         $product_new = $product->replicate();
         $product_new->slug = Str::slug($product_new->name, '-') . '-' . strtolower(Str::random(5));
+        if (auth()->user()->user_type === 'seller') {
+            app(ProductReviewService::class)->prepareSellerSave($product_new, 'draft');
+        }
 
         if ($product_new->save()) {
 
@@ -782,7 +805,9 @@ class ProductController extends Controller
             }
 
             flash(translate('Product has been duplicated successfully'))->success();
-            return redirect()->route('product.index');
+            return redirect()->route(
+                auth()->user()->user_type === 'seller' ? 'seller.products' : 'product.index'
+            );
         } else {
             flash(translate('Something went wrong'))->error();
             return back();
@@ -806,8 +831,13 @@ class ProductController extends Controller
     public function updatePublished(Request $request)
     {
         $product = Product::findOrFail($request->id);
-        $product->published = (int) $request->status;
-        if (auth()->user()->user_type !== 'seller' && (int) $request->status === 1) {
+        if (auth()->user()->user_type === 'seller') {
+            abort_unless((int) $product->shop_id === (int) auth()->user()->shop_id, 403);
+            $product->published = $product->approved ? (int) $request->boolean('status') : 0;
+        } else {
+            $product->published = (int) $request->boolean('status');
+        }
+        if (auth()->user()->user_type !== 'seller' && (int) $product->published === 1) {
             $product->approved = 1;
         }
         $product->save();
@@ -1025,6 +1055,16 @@ class ProductController extends Controller
 
     private function resolveShopForProduct(Request $request, ?Product $product = null): ?Shop
     {
+        if (auth()->user()->user_type === 'seller') {
+            $shopId = auth()->user()->shop_id;
+
+            if ($product && (int) $product->shop_id !== (int) $shopId) {
+                abort(403);
+            }
+
+            return $shopId ? Shop::find($shopId) : null;
+        }
+
         $shopId = $request->input('shop_id');
 
         if (!$shopId) {

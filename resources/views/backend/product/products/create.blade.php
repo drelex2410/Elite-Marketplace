@@ -1,10 +1,10 @@
-@extends('backend.layouts.app')
+@extends(($sellerMode ?? false) ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
     <div class="aiz-titlebar text-left mt-2 mb-3">
         <h5 class="mb-0 h6">{{ translate('Add New Product') }}</h5>
     </div>
-    <form class="form form-horizontal mar-top" action="{{ route('product.store') }}" method="POST"
+    <form class="form form-horizontal mar-top" action="{{ route(($sellerMode ?? false) ? 'seller.product.store' : 'product.store') }}" method="POST"
         enctype="multipart/form-data" id="product_form">
         @csrf
         <div class="row gutters-5">
@@ -372,10 +372,15 @@
                         <h5 class="mb-0 h6">{{ translate('Product Status') }}</h5>
                     </div>
                     <div class="card-body">
-                        <select class="form-control aiz-selectpicker" name="status">
-                            <option value="0">{{ translate('Draft') }}</option>
-                            <option value="1" selected>{{ translate('Published') }}</option>
-                        </select>
+                        @if ($sellerMode ?? false)
+                            <input type="hidden" name="status" value="0">
+                            <p class="mb-0 text-muted">{{ translate('Seller products remain private until staff approval. Save a draft or submit it for review.') }}</p>
+                        @else
+                            <select class="form-control aiz-selectpicker" name="status">
+                                <option value="0">{{ translate('Draft') }}</option>
+                                <option value="1" selected>{{ translate('Published') }}</option>
+                            </select>
+                        @endif
                     </div>
                 </div>
                 <div class="card">
@@ -543,7 +548,12 @@
             </div>
         </div>
         <div class="mar-all text-right mb-3">
-            <button type="submit" class="btn btn-primary" id="upload-product">{{ translate('Upload Product') }}</button>
+            @if ($sellerMode ?? false)
+                <button type="submit" name="review_action" value="draft" class="btn btn-light">{{ translate('Save Draft') }}</button>
+                <button type="submit" name="review_action" value="submit" class="btn btn-primary" id="upload-product">{{ translate('Submit for Review') }}</button>
+            @else
+                <button type="submit" class="btn btn-primary" id="upload-product">{{ translate('Upload Product') }}</button>
+            @endif
         </div>
     </form>
 @endsection
@@ -583,7 +593,7 @@
             $.ajax({
                 type: "POST",
                 data: $('#product_form').serialize(),
-                url: '{{ route('product.new_attribute') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.new_attribute' : 'product.new_attribute') }}',
                 success: function(data) {
                     if (data.count == -1) {
                         AIZ.plugins.notify('warning', '{{ translate('Please select an attribute.') }}');
@@ -608,7 +618,7 @@
                 data: {
                     attribute_id: $(e).val()
                 },
-                url: '{{ route('product.get_attribute_values') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.get_attribute_values' : 'product.get_attribute_values') }}',
                 success: function(data) {
                     $(e).closest('.row').find('.attr-values').html(data);
                     AIZ.plugins.bootstrapSelect();
@@ -620,7 +630,7 @@
             $.ajax({
                 type: "POST",
                 data: $('#product_form').serialize(),
-                url: '{{ route('product.new_option') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.new_option' : 'product.new_option') }}',
                 success: function(data) {
                     if (data.count == -2) {
                         AIZ.plugins.notify('warning', '{{ translate('Maximum option limit reached.') }}');
@@ -647,7 +657,7 @@
                 data: {
                     attribute_id: $(e).val()
                 },
-                url: '{{ route('product.get_option_choices') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.get_option_choices' : 'product.get_option_choices') }}',
                 success: function(data) {
                     $(e).closest('.row').find('.attr-values').html(data);
                     AIZ.plugins.bootstrapSelect();
@@ -658,7 +668,7 @@
         function update_sku() {
             $.ajax({
                 type: "POST",
-                url: '{{ route('product.sku_combination') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.sku_combination' : 'product.sku_combination') }}',
                 data: $('#product_form').serialize(),
                 success: function(data) {
                     $('#sku_combination').html(data);

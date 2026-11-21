@@ -267,7 +267,7 @@
 
                 <!-- Seller -->
                 @if (addon_is_activated('multi_vendor'))
-                    @canany(['show_sellers','show_payouts','show_payout_requests','show_commission_log','show_seller_packages','show_seller_package_payments','seller_verification_form'])
+                    @canany(['show_sellers','view_seller_products','show_payouts','show_payout_requests','show_commission_log','show_seller_packages','show_seller_package_payments','seller_verification_form'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12.444" viewBox="0 0 14 12.444">
@@ -291,6 +291,17 @@
                                             class="aiz-side-nav-link {{ areActiveRoutes(['admin.seller.create', 'admin.seller.edit']) }}">
                                             <span class="aiz-side-nav-text">{{ translate('Sellers') }}</span>
                                             @if($sellers > 0)<span class="badge badge-info">{{ $sellers }}</span> @endif
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('view_seller_products')
+                                    <li class="aiz-side-nav-item">
+                                        <a href="{{ route('admin.seller_product_reviews.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['admin.seller_product_reviews.index']) }}">
+                                            <span class="aiz-side-nav-text">{{ translate('Product Reviews') }}</span>
+                                            @if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'review_status'))
+                                                @php($pendingProductReviews = \App\Models\Product::where('review_status', 'pending_approval')->count())
+                                                @if ($pendingProductReviews > 0)<span class="badge badge-warning">{{ $pendingProductReviews }}</span>@endif
+                                            @endif
                                         </a>
                                     </li>
                                 @endcan
