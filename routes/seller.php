@@ -118,7 +118,6 @@ Route::group([
         Route::patch('/orders/{id}/status', [SellerController::class, 'update_order_status'])->whereNumber('id')->name('orders.update_delivery_status');
         Route::patch('/orders/{id}/tracking', [SellerController::class, 'update_order_tracking'])->whereNumber('id')->name('orders.tracking.update');
     });
-    Route::post('/orders/add-tracking-information', [OrderController::class, 'add_tracking_information'])->name('orders.add_tracking_information');
 
     // Seller payouts
     Route::post('/payouts/store-request', [SellerPayoutController::class, 'store_withdraw_request'])->name('payouts.request.store');

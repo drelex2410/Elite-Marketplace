@@ -1,0 +1,3 @@
+@extends('seller.layouts.app')
+@section('title', translate('Payout').' #'.$payout->id)
+@section('content')<div class="seller-card"><h1 class="h5">{{ translate('Payout') }} #{{ $payout->id }}</h1><dl class="row"><dt class="col-sm-4">{{ translate('Requested') }}</dt><dd class="col-sm-8">{{ format_price($payout->requested_amount) }}</dd><dt class="col-sm-4">{{ translate('Paid') }}</dt><dd class="col-sm-8">{{ format_price($payout->paid_amount) }}</dd><dt class="col-sm-4">{{ translate('Status') }}</dt><dd class="col-sm-8">{{ ucfirst($payout->status) }}</dd><dt class="col-sm-4">{{ translate('Settlement reference') }}</dt><dd class="col-sm-8">{{ $payout->txn_code ?: '—' }}</dd></dl></div>@endsection

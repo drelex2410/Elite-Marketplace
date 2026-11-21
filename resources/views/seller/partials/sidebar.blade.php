@@ -13,6 +13,7 @@
             <li><a href="{{ route('seller.package_select') }}"><i class="las la-shield-alt"></i>{{ translate('Packages') }}</a></li>
             <li><a href="{{ route('seller.orders') }}"><i class="las la-list"></i>{{ translate('Orders') }}</a></li>
             <li><a href="{{ route('seller.commission_log.index') }}"><i class="las la-wallet"></i>{{ translate('Earnings') }}</a></li>
+            <li><a href="{{ route('seller.payouts.index') }}"><i class="las la-money-check-alt"></i>{{ translate('Payouts') }}</a></li>
             <li><a href="{{ route('seller.coupons.index') }}"><i class="las la-ticket-alt"></i>{{ translate('Coupons') }}</a></li>
             <li><a href="{{ route('seller.querries.index') }}"><i class="las la-comment-alt"></i>{{ translate('Product Queries') }}</a></li>
             <li><a href="{{ route('seller.uploaded_files') }}"><i class="las la-folder"></i>{{ translate('Uploaded Files') }}</a></li>
