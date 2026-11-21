@@ -17,9 +17,7 @@ use App\Addons\Multivendor\Http\Controllers\Seller\SellerPackageController;
 use App\Addons\Multivendor\Http\Controllers\Seller\SellerPayoutController;
 use App\Addons\Multivendor\Http\Controllers\Seller\ShopController;
 use App\Http\Controllers\AizUploadController;
-use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 
 /*
@@ -113,12 +111,13 @@ Route::group([
     // Orders
     Route::get('/orders', [SellerController::class, 'orders'])->name('orders');
     Route::get('/pickup-orders', [SellerController::class, 'pickup_orders'])->name('pickup.orders');
-
-    Route::get('/orders/show/{id}', [SellerController::class, 'orders_show'])->name('orders_show');
-    Route::get('/orders/print/{order_id}', [InvoiceController::class, 'invoice_print'])->name('orders.invoice.print');
-    Route::get('/orders/invoice/{order_id}', [InvoiceController::class, 'seller_invoice_download'])->name('orders.invoice.download');
-    Route::post('/orders/update_delivery_status', [OrderController::class, 'update_delivery_status'])->name('orders.update_delivery_status');
-    Route::post('/orders/update_payment_status', [OrderController::class, 'update_payment_status'])->name('orders.update_payment_status');
+    Route::get('/orders/{id}', [SellerController::class, 'orders_show'])->whereNumber('id')->name('orders_show');
+    Route::get('/orders/{id}/print', [SellerController::class, 'order_invoice_print'])->whereNumber('id')->name('orders.invoice.print');
+    Route::get('/orders/{id}/invoice', [SellerController::class, 'order_invoice_download'])->whereNumber('id')->name('orders.invoice.download');
+    Route::middleware('seller.active')->group(function () {
+        Route::patch('/orders/{id}/status', [SellerController::class, 'update_order_status'])->whereNumber('id')->name('orders.update_delivery_status');
+        Route::patch('/orders/{id}/tracking', [SellerController::class, 'update_order_tracking'])->whereNumber('id')->name('orders.tracking.update');
+    });
     Route::post('/orders/add-tracking-information', [OrderController::class, 'add_tracking_information'])->name('orders.add_tracking_information');
 
     // Seller payouts

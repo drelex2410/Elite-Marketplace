@@ -4,16 +4,21 @@ namespace App\Addons\Multivendor\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ProductController;
+use App\Http\Requests\Seller\UpdateOrderStatusRequest;
+use App\Http\Requests\Seller\UpdateOrderTrackingRequest;
 use App\Models\Product;
 use App\Services\Sellers\SellerDashboardService;
+use App\Services\Sellers\SellerOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use PDF;
 
 class SellerController extends Controller
 {
     public function __construct(
         private readonly SellerDashboardService $dashboardService,
-        private readonly ProductController $productController
+        private readonly ProductController $productController,
+        private readonly SellerOrderService $orderService
     ) {}
 
     public function seller_dashboard(Request $request)
@@ -128,6 +133,97 @@ class SellerController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function orders(Request $request)
+    {
+        $shop = $request->user()->shop;
+        $orders = $this->orderService->paginate($shop, $request->only([
+            'search',
+            'payment_status',
+            'delivery_status',
+        ]));
+        $pickupOnly = false;
+
+        return view('seller.orders.index', compact('shop', 'orders', 'pickupOnly'));
+    }
+
+    public function pickup_orders(Request $request)
+    {
+        $shop = $request->user()->shop;
+        $orders = $this->orderService->paginate($shop, $request->only([
+            'search',
+            'payment_status',
+            'delivery_status',
+        ]), true);
+        $pickupOnly = true;
+
+        return view('seller.orders.index', compact('shop', 'orders', 'pickupOnly'));
+    }
+
+    public function orders_show(Request $request, int $id)
+    {
+        $shop = $request->user()->shop;
+        $order = $this->orderService->findForShop($shop, $id);
+        $this->authorize('view', $order);
+        $allowedTransitions = $shop->isPubliclyVisible()
+            ? $this->orderService->allowedTransitionsForShop($order, $shop)
+            : [];
+        $shippingAddress = json_decode((string) $order->shipping_address, true) ?: [];
+
+        return view('seller.orders.show', compact(
+            'shop',
+            'order',
+            'allowedTransitions',
+            'shippingAddress'
+        ));
+    }
+
+    public function update_order_status(UpdateOrderStatusRequest $request, int $id)
+    {
+        $order = $this->orderService->findForShop($request->user()->shop, $id);
+        $this->authorize('updateFulfillment', $order);
+        $this->orderService->transition(
+            $request->user()->shop,
+            $id,
+            $request->validated('status'),
+            $request->user()->id
+        );
+
+        return back()->with('success', translate('Fulfillment status updated.'));
+    }
+
+    public function update_order_tracking(UpdateOrderTrackingRequest $request, int $id)
+    {
+        $order = $this->orderService->findForShop($request->user()->shop, $id);
+        $this->authorize('updateFulfillment', $order);
+        $this->orderService->updateTracking(
+            $request->user()->shop,
+            $id,
+            $request->validated(),
+            $request->user()->id
+        );
+
+        return back()->with('success', translate('Tracking information updated.'));
+    }
+
+    public function order_invoice_download(Request $request, int $id)
+    {
+        $order = $this->orderService->findForShop($request->user()->shop, $id);
+        $this->authorize('view', $order);
+        $shippingAddress = json_decode((string) $order->shipping_address, true) ?: [];
+
+        return PDF::loadView('seller.orders.invoice', compact('order', 'shippingAddress'))
+            ->download('seller-order-'.$order->code.'.pdf');
+    }
+
+    public function order_invoice_print(Request $request, int $id)
+    {
+        $order = $this->orderService->findForShop($request->user()->shop, $id);
+        $this->authorize('view', $order);
+        $shippingAddress = json_decode((string) $order->shipping_address, true) ?: [];
+
+        return view('seller.orders.invoice', compact('order', 'shippingAddress'));
     }
 
     private function ownedProduct(Request $request, int $id): Product

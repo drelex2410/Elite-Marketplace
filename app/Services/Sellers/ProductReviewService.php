@@ -87,9 +87,13 @@ class ProductReviewService
             );
 
             DB::afterCommit(function () use ($product, $status, $reason): void {
-                $seller = $product->shop?->user;
-                if ($seller) {
-                    $seller->notify(new ProductReviewStatusNotification($product, $status, $reason));
+                try {
+                    $seller = $product->shop?->user;
+                    if ($seller) {
+                        $seller->notify(new ProductReviewStatusNotification($product, $status, $reason));
+                    }
+                } catch (\Throwable $exception) {
+                    report($exception);
                 }
             });
 
