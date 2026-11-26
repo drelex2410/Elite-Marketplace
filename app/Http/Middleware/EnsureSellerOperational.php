@@ -25,6 +25,7 @@ class EnsureSellerOperational
             $user->banned ||
             ! $shop->approval ||
             ! $shop->published ||
+            ($shop->seller_package_id && $shop->package_invalid_at && $shop->package_invalid_at->lt(today())) ||
             ($status !== '' && $status !== ShopStatus::Active->value)
         ) {
             return redirect()

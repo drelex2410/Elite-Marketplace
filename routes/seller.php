@@ -90,7 +90,7 @@ Route::group([
 
     // Seller packages
     Route::get('/select-package', [SellerPackageController::class, 'select_package'])->name('package_select');
-    Route::post('/packages/purchase', [SellerPackageController::class, 'package_purchase'])->name('packages.purchase');
+    Route::post('/packages/purchase', [SellerPackageController::class, 'package_purchase'])->middleware('seller.active')->name('packages.purchase');
     Route::post('/offline_seller_package_purchase_modal', [SellerPackageController::class, 'offline_seller_package_purchase_modal'])->name('offline_seller_package_purchase_modal');
     Route::get('/packages/purchase-history', [SellerPackageController::class, 'package_purchase_history'])->name('package_purchase_history');
 
@@ -192,14 +192,12 @@ Route::group([
     Route::get('/sellers/commission-log', [AdminCommissionController::class, 'commission_history'])->name('commission_log.index');
 
     // Seller package
-    Route::resource('seller-packages', AdminSellerPackageController::class)->except(['edit', 'destroy'])->names('seller_packages');
+    Route::resource('seller-packages', AdminSellerPackageController::class)->except(['edit'])->names('seller_packages');
     Route::get('/seller-packages/edit/{id}', [AdminSellerPackageController::class, 'edit'])->name('seller_packages.edit');
-    Route::get('/seller-packages/destroy/{id}', [AdminSellerPackageController::class, 'destroy'])->name('seller_packages.destroy');
     Route::get('/seller/package-payments', [AdminSellerPackageController::class, 'package_purchase_history'])->name('package_purchase_history');
 
 
     Route::get('/shop-setting', [AdminShopController::class, 'shop_setting'])->name('shop_setting.index');
     Route::patch('/shop-setting/{id}', [AdminShopController::class, 'shop_setting_update'])->name('shop_setting.update');
+    Route::post('/seller-package-validation-check', [AdminSellerPackageController::class, 'check_seller_package_validation'])->name('seller_packages.unpublish_products');
 });
-
-Route::get('/seller-package-validation-check', [AdminSellerPackageController::class, 'check_seller_package_validation'])->name('seller_packages.unpublish_products');

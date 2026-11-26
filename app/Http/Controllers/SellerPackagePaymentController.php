@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SellerPackage;
 use App\Models\SellerPackagePayment;
+use App\Services\Sellers\SellerPackageActivationService;
 use Illuminate\Http\Request;
 
 class SellerPackagePaymentController extends Controller
@@ -21,26 +21,18 @@ class SellerPackagePaymentController extends Controller
     public function offline_payment_request()
     {
         $package_payment_requests = SellerPackagePayment::where('offline_payment', 1)->orderBy('id', 'desc')->paginate(10);
+
         return view('backend.manual_payment_methods.seller_package_payment_request', compact('package_payment_requests'));
     }
 
-    public function offline_payment_approval($id)
+    public function offline_payment_approval($id, SellerPackageActivationService $activationService)
     {
-        $package_payment    = SellerPackagePayment::findOrFail($id);
-        $package_details    = SellerPackage::findOrFail($package_payment->seller_package_id);
-        $package_payment->approval      = 1;
-        if ($package_payment->save()) {
-            $seller                                 = $package_payment->user->shop;
-            $seller->seller_package_id              = $package_payment->seller_package_id;
-            $seller->product_upload_limit           = $package_details->product_upload_limit;
-            $seller->commission                     = $package_details->commission;
-            $seller->package_invalid_at             = date('Y-m-d', strtotime($seller->package_invalid_at . ' +' . $package_details->duration . 'days'));
-            if ($seller->save()) {
-                flash(translate('Offline Seller Package Payment approved successfully.'))->success();
-                return back();
-            }
-        }
-        flash(translate('Something went wrong'))->error();
+        $user = auth()->user();
+        abort_unless($user && ($user->user_type === 'admin' || $user->can('approve_offline_seller_package_payment')), 403);
+        $packagePayment = SellerPackagePayment::query()->findOrFail($id);
+        $activationService->approveOffline($packagePayment, $user);
+        flash(translate('Offline Seller Package Payment approved successfully.'))->success();
+
         return back();
     }
 
@@ -57,7 +49,6 @@ class SellerPackagePaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -90,7 +81,6 @@ class SellerPackagePaymentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */

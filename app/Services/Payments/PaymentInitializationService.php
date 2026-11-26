@@ -2,8 +2,8 @@
 
 namespace App\Services\Payments;
 
-use App\Http\Controllers\Payment\AuthorizenetPaymentController;
 use App\Http\Controllers\Payment\AlatPayController;
+use App\Http\Controllers\Payment\AuthorizenetPaymentController;
 use App\Http\Controllers\Payment\FlutterwavePaymentController;
 use App\Http\Controllers\Payment\IyzicoPaymentController;
 use App\Http\Controllers\Payment\MercadopagoPaymentController;
@@ -21,10 +21,10 @@ use App\Models\CombinedOrder;
 use App\Models\Currency;
 use App\Models\ManualPaymentMethod;
 use App\Models\Payment;
+use App\Models\SellerPackage;
 use App\Models\User;
 use App\Services\Checkout\CheckoutCartFinalizer;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +39,7 @@ class PaymentInitializationService
         private readonly PaymentGatewayManager $gatewayManager,
         private readonly PaymentCallbackService $callbackService,
         private readonly CheckoutCartFinalizer $checkoutCartFinalizer,
-    ) {
-    }
+    ) {}
 
     public function initializeApi(string $gateway, Request $request): array
     {
@@ -132,11 +131,11 @@ class PaymentInitializationService
         if (in_array($paymentType, ['cart_payment', 'repayment'], true)) {
             $combinedOrder = CombinedOrder::query()->with('orders')->where('code', $orderCode)->first();
 
-            if (!$combinedOrder) {
+            if (! $combinedOrder) {
                 throw new HttpException(404, 'Order not found.');
             }
 
-            if ($combinedOrder->user_id !== null && (!$user || (int) $combinedOrder->user_id !== (int) $user->id)) {
+            if ($combinedOrder->user_id !== null && (! $user || (int) $combinedOrder->user_id !== (int) $user->id)) {
                 throw new HttpException(403, 'You are not allowed to pay for this order.');
             }
 
@@ -149,7 +148,7 @@ class PaymentInitializationService
 
             $amount = (float) $combinedOrder->grand_total;
         } elseif ($paymentType === 'wallet_payment') {
-            if (!$user) {
+            if (! $user) {
                 throw new HttpException(401, 'Authentication is required to recharge this wallet.');
             }
 
@@ -162,6 +161,19 @@ class PaymentInitializationService
             if ($amount <= 0) {
                 throw new HttpException(422, 'Recharge amount must be greater than zero.');
             }
+        } elseif ($paymentType === 'seller_package_payment') {
+            if (! $user || $user->user_type !== 'seller' || ! $user->shop_id) {
+                throw new HttpException(403, 'A seller account is required to purchase a package.');
+            }
+
+            $package = SellerPackage::query()->find($request->integer('seller_package_id'));
+            if (! $package || (Schema::hasColumn('seller_packages', 'status') && ! $package->status)) {
+                throw new HttpException(404, 'Seller package not found.');
+            }
+
+            $amount = (float) $package->amount;
+            $orderCode = 'seller-package-'.$package->id;
+            $request->merge(['seller_package_id' => $package->id, 'amount' => $amount]);
         } else {
             throw new HttpException(422, 'Unsupported payment type.');
         }
@@ -253,6 +265,7 @@ class PaymentInitializationService
         session()->put('user_id', $payment->user_id);
         session()->put('order_code', $payment->order_code);
         session()->put('transactionId', $request->input('transactionId'));
+        session()->put('seller_package_id', $request->input('seller_package_id'));
         session()->put('receipt', $request->file('receipt'));
         session()->put('receiptFile', null);
         session()->put('card_number', $request->input('card_number'));
@@ -301,7 +314,7 @@ class PaymentInitializationService
             $query['order_code'] = $payment->order_code;
         }
 
-        return $payment->redirect_to . '?' . http_build_query($query);
+        return $payment->redirect_to.'?'.http_build_query($query);
     }
 
     private function finalizeCheckoutCartIfNeeded(Payment $payment): void

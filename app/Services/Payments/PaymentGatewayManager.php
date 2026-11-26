@@ -29,9 +29,7 @@ class PaymentGatewayManager
         'alatpay' => 'alatpay_payment',
     ];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function assertEnabled(string $gateway): void
     {
@@ -44,7 +42,7 @@ class PaymentGatewayManager
             $offlinePaymentId = (int) end($segments);
             $method = ManualPaymentMethod::query()->find($offlinePaymentId);
 
-            if (!$method) {
+            if (! $method) {
                 throw new HttpException(404, 'Offline payment method not found.');
             }
 
@@ -69,7 +67,30 @@ class PaymentGatewayManager
 
     public function isOnline(string $gateway): bool
     {
-        return !$this->isOffline($gateway);
+        return ! $this->isOffline($gateway);
+    }
+
+    public function availableForSellerPackages(): array
+    {
+        $settings = $this->settings();
+        $gateways = collect(self::SETTINGS)
+            ->except(['cash_on_delivery'])
+            ->filter(fn (string $settingKey) => (int) $settings->get($settingKey, 0) === 1)
+            ->keys()
+            ->map(fn (string $gateway) => ['value' => $gateway, 'label' => Str::headline($gateway)]);
+
+        if ((int) $settings->get('offline_payment', 0) === 1) {
+            $manual = ManualPaymentMethod::query()
+                ->where('type', 'bank_payment')
+                ->get()
+                ->map(fn (ManualPaymentMethod $method) => [
+                    'value' => 'offline_payment-'.$method->id,
+                    'label' => $method->heading,
+                ]);
+            $gateways = $gateways->concat($manual);
+        }
+
+        return $gateways->values()->all();
     }
 
     private function settings(): Collection
