@@ -91,6 +91,23 @@ class SellerController extends Controller
     {
         $this->assertProductCapacity($request);
 
+        if ($request->boolean('is_variant')) {
+            $request->validate([
+                'product_options' => ['required', 'array', 'min:1', 'max:3'],
+                'product_options.*' => ['required', 'integer', 'distinct', 'exists:attributes,id'],
+                'variations' => ['required', 'array', 'min:1'],
+                'variations.*.code' => ['required', 'string'],
+                'variations.*.price' => ['required', 'numeric', 'min:0'],
+                'variations.*.stock' => ['required', 'boolean'],
+                'variations.*.current_stock' => ['required', 'integer', 'min:0'],
+                'variations.*.sku' => ['nullable', 'string', 'max:255'],
+                'variations.*.img' => ['nullable'],
+            ], [
+                'variations.required' => translate('Select at least one option value to generate product variants.'),
+                'variations.*.current_stock.required' => translate('Enter the current stock for every product variant.'),
+            ]);
+        }
+
         return $this->productController->store($request);
     }
 

@@ -153,10 +153,34 @@ select:focus {
     object-fit: contain;
 }
 
-.seller-topbar,
 .seller-sidebar,
 .seller-card {
     border-color: var(--elite-border) !important;
+}
+
+.seller-topbar {
+    color: #00e5e5 !important;
+    background: #111820 !important;
+    border-color: rgba(0, 229, 229, 0.28) !important;
+}
+
+.seller-topbar a,
+.seller-topbar span,
+.seller-topbar .btn,
+.seller-topbar .las {
+    color: #00e5e5 !important;
+}
+
+.seller-topbar .btn {
+    background: transparent !important;
+    border-color: rgba(0, 229, 229, 0.72) !important;
+}
+
+.seller-topbar .btn:hover,
+.seller-topbar .btn:focus {
+    color: #111820 !important;
+    background: #00e5e5 !important;
+    border-color: #00e5e5 !important;
 }
 
 .seller-shop-card {

@@ -6,6 +6,8 @@ The supplied Elite Group Cooperative Society logo is the visual source of truth.
 
 ## Core palette
 
+Seller workspace headers use dark charcoal (`#111820`) with bright cyan (`#00E5E5`) navigation, icons, and interactive controls to preserve the requested high-contrast brand treatment across desktop and mobile layouts.
+
 | Token | Value | Use |
 | --- | --- | --- |
 | Primary | `#00D9CC` | Buttons, selected navigation, switches, key highlights |

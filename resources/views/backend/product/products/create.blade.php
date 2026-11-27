@@ -150,7 +150,7 @@
                                 <div class="form-group row gutters-10 ">
                                     <div class="col-xxl-3 col-xl-4 col-md-5 attr-names">
                                         <select class="form-control aiz-selectpicker" name="product_options[]"
-                                            onchange="get_option_choices(this)" data-live-search="true"
+                                            data-live-search="true"
                                             title="{{ translate('Select an option') }}">
                                             @foreach ($attributes as $key => $attribute)
                                                 <option value="{{ $attribute->id }}">
@@ -566,17 +566,18 @@
         //     $('body').addClass('side-menu-closed');
         // });
         $('#product_form').bind('submit', function(e) {
-            // Disable the submit button while evaluating if the form should be submitted
-            $("#upload-product").prop('disabled', true);
-
             var valid = true;
 
             if (!valid) {
                 e.preventDefault();
-
-                // Reactivate the button if the form was not submitted
-                $("#upload-product").button.prop('disabled', false);
+                return;
             }
+
+            // Wait until the browser has captured the clicked submit button's
+            // name/value pair so review_action=submit is not dropped.
+            setTimeout(function() {
+                $("#upload-product").prop('disabled', true);
+            }, 0);
         });
 
         function is_variant_product(el) {
@@ -661,9 +662,20 @@
                 success: function(data) {
                     $(e).closest('.row').find('.attr-values').html(data);
                     AIZ.plugins.bootstrapSelect();
+                },
+                error: function() {
+                    AIZ.plugins.notify('danger', '{{ translate('Unable to load option values. Please refresh and try again.') }}');
                 }
             });
         }
+
+        $(document).on('change changed.bs.select', 'select[name="product_options[]"]', function() {
+            var select = this;
+            clearTimeout($(select).data('option-load-timer'));
+            $(select).data('option-load-timer', setTimeout(function() {
+                if ($(select).val()) get_option_choices(select);
+            }, 0));
+        });
 
         function update_sku() {
             $.ajax({

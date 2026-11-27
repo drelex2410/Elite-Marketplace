@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="app-url" content="{{ rtrim(url('/'), '/') }}">
+    <meta name="file-base-url" content="{{ getFileBaseURL() }}">
     <title>@yield('title', translate('Seller dashboard')) | {{ config('app.name') }}</title>
     <link rel="stylesheet" href="{{ static_asset('assets/css/vendors.css') }}">
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
@@ -43,6 +45,32 @@
         @media (max-width: 1200px) { .seller-grid, .seller-content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 768px) { .seller-topbar { height: auto; padding: 12px 16px; gap: 10px; } .seller-topbar > div { gap: 8px !important; } .seller-topbar .btn { padding: 8px 10px; } .seller-topbar form, .seller-topbar > div > span { display: none; } .seller-menu-toggle { display: inline-flex; align-items: center; justify-content: center; } .seller-body { display: block; } .seller-sidebar { display: none; min-height: auto; border-bottom: 1px solid #e7e9ef; } .seller-sidebar.is-open { display: block; } .seller-main { padding: 16px; } .seller-grid, .seller-content-grid { grid-template-columns: 1fr; } }
     </style>
+    <script>
+        var AIZ = window.AIZ || {};
+        AIZ.local = {
+            nothing_selected: @json(translate('Nothing selected')),
+            nothing_found: @json(translate('Nothing found')),
+            choose_file: @json(translate('Choose file')),
+            file_selected: @json(translate('File selected')),
+            files_selected: @json(translate('Files selected')),
+            add_more_files: @json(translate('Add more files')),
+            adding_more_files: @json(translate('Adding more files')),
+            drop_files_here_paste_or: @json(translate('Drop files here, paste or')),
+            browse: @json(translate('Browse')),
+            upload_complete: @json(translate('Upload complete')),
+            upload_paused: @json(translate('Upload paused')),
+            resume_upload: @json(translate('Resume upload')),
+            pause_upload: @json(translate('Pause upload')),
+            retry_upload: @json(translate('Retry upload')),
+            cancel_upload: @json(translate('Cancel upload')),
+            uploading: @json(translate('Uploading')),
+            processing: @json(translate('Processing')),
+            complete: @json(translate('Complete')),
+            file: @json(translate('File')),
+            files: @json(translate('Files'))
+        };
+        window.AIZ = AIZ;
+    </script>
     @stack('styles')
 </head>
 <body>
