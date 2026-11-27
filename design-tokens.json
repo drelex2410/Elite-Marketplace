@@ -1,0 +1,35 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "color": {
+    "brand": {
+      "primary": { "$value": "#00D9CC", "$type": "color" },
+      "primaryHover": { "$value": "#00B8AD", "$type": "color" },
+      "accent": { "$value": "#00F8F8", "$type": "color" },
+      "charcoal": { "$value": "#111820", "$type": "color" },
+      "navy": { "$value": "#101C25", "$type": "color" }
+    },
+    "surface": {
+      "base": { "$value": "#FFFFFF", "$type": "color" },
+      "subtle": { "$value": "#F5F7F9", "$type": "color" },
+      "border": { "$value": "#D7E1E7", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "#111820", "$type": "color" },
+      "secondary": { "$value": "#667085", "$type": "color" },
+      "link": { "$value": "#007F78", "$type": "color" }
+    }
+  },
+  "radius": {
+    "control": { "$value": "6px", "$type": "dimension" },
+    "card": { "$value": "8px", "$type": "dimension" },
+    "authCard": { "$value": "14px", "$type": "dimension" }
+  },
+  "shadow": {
+    "card": { "$value": "0 12px 30px rgba(16, 28, 37, 0.08)", "$type": "shadow" },
+    "dialog": { "$value": "0 24px 64px rgba(0, 0, 0, 0.32)", "$type": "shadow" }
+  },
+  "breakpoint": {
+    "mobile": { "$value": "768px", "$type": "dimension" },
+    "desktopNav": { "$value": "1200px", "$type": "dimension" }
+  }
+}

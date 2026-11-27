@@ -1,4 +1,5 @@
-<aside class="seller-sidebar">
+@php($shop = $shop ?? auth()->user()->shop)
+<aside class="seller-sidebar" id="seller-sidebar">
     <div class="seller-shop-card">
         <div class="seller-shop-avatar">
             @if ($shop->logo)<img src="{{ uploaded_asset($shop->logo) }}" alt="{{ $shop->name }}" class="w-100 h-100">@else{{ strtoupper(substr($shop->name, 0, 1)) }}@endif

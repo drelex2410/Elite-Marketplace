@@ -152,6 +152,12 @@ Lifecycle mapping will preserve the legacy booleans:
 9. Add order/refund/coupon/upload ownership enforcement.
 10. Add comprehensive feature and policy tests, then run the full regression suite and browser smoke tests.
 
+## Completion update — 27 November 2026
+
+The native seller module described by this audit is now restored on `feature/rebuild-seller-module`. Additive migrations provide shop lifecycle, product review history, audit events, package safeguards, and payout reservations without replacing or truncating the restored database. Authenticated seller and administrator controllers, policies, views, and tests now cover the workflows listed in `docs/vendor-workflow.md`.
+
+The previously identified unsafe GET mutations have been converted to CSRF-protected actions. The obsolete upload activation routine capable of remote database deletion has been removed. POS and bulk product import remain intentionally unavailable until they can be implemented with complete shop scoping.
+
 ## Completion boundary
 
 Payment gateway success will never be simulated. Package activation will only trust an administrator action or an existing verified transaction/callback path. POS will remain hidden until every query and mutation can be proven shop-scoped; that limitation will be documented rather than exposing the current admin POS routes to sellers.

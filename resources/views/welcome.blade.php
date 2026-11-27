@@ -16,6 +16,7 @@
 
     <!-- Vite Assets -->
     @vite(['resources/css/global.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ static_asset('assets/css/elite-brand.css') }}?v={{ filemtime(public_path('assets/css/elite-brand.css')) }}">
 
     <style>
         body {

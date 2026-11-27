@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Requests\Seller\UpdateOrderStatusRequest;
 use App\Http\Requests\Seller\UpdateOrderTrackingRequest;
 use App\Models\Product;
+use App\Models\Review;
 use App\Services\Sellers\SellerDashboardService;
 use App\Services\Sellers\SellerOrderService;
 use Illuminate\Http\Request;
@@ -27,6 +28,36 @@ class SellerController extends Controller
         $dashboard = $this->dashboardService->build($shop, (int) $request->integer('days', 30));
 
         return view('seller.dashboard', compact('shop', 'dashboard'));
+    }
+
+    public function profile(Request $request)
+    {
+        $shop = $request->user()->shop;
+
+        return view('seller.profile', compact('shop'));
+    }
+
+    public function profile_update(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:191'],
+            'phone' => ['nullable', 'string', 'max:40'],
+            'avatar' => ['nullable', 'integer', 'exists:uploads,id'],
+            'password' => ['nullable', 'string', 'min:12', 'confirmed'],
+        ]);
+        if (! empty($validated['avatar'])) {
+            abort_unless(\App\Models\Upload::query()->where('id', $validated['avatar'])->where('user_id', $request->user()->id)->exists(), 403);
+        }
+        $user = $request->user();
+        $user->name = $validated['name'];
+        $user->phone = $validated['phone'] ?? null;
+        $user->avatar = $validated['avatar'] ?? $user->avatar;
+        if (! empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
+        $user->save();
+
+        return back()->with('success', translate('Profile updated.'));
     }
 
     public function seller_products_list(Request $request)
@@ -224,6 +255,18 @@ class SellerController extends Controller
         $shippingAddress = json_decode((string) $order->shipping_address, true) ?: [];
 
         return view('seller.orders.invoice', compact('order', 'shippingAddress'));
+    }
+
+    public function seller_product_reviews(Request $request)
+    {
+        $shop = $request->user()->shop;
+        $reviews = Review::query()
+            ->with(['product', 'user'])
+            ->whereHas('product', fn ($query) => $query->where('shop_id', $shop->id))
+            ->latest()
+            ->paginate(15);
+
+        return view('seller.reviews.index', compact('shop', 'reviews'));
     }
 
     private function ownedProduct(Request $request, int $id): Product

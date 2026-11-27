@@ -18,8 +18,7 @@ class BootstrapService
     public function __construct(
         private readonly AddonStatusManager $addonStatusManager,
         private readonly AlatPayConfig $alatPayConfig,
-    ) {
-    }
+    ) {}
 
     public function build(): array
     {
@@ -37,8 +36,9 @@ class BootstrapService
             ],
             'appMetaTitle' => $metaTitle,
             'appMetaDescription' => $metaDescription,
-            'appLogo' => $this->assetUrl($this->setting($settings, 'header_logo'), static_asset('assets/img/logo.svg')),
-            'appUrl' => rtrim((string) config('app.url'), '/') . '/',
+            'appLogo' => static_asset('assets/brand/elite-group-mark.png'),
+            'primaryColor' => '#00d9cc',
+            'appUrl' => rtrim((string) config('app.url'), '/').'/',
             'cacheVersion' => $this->setting($settings, 'force_cache_clear_version', '1'),
             'demoMode' => (string) env('DEMO_MODE') === 'On',
             'appLanguage' => (string) env('DEFAULT_LANGUAGE', 'en'),
@@ -281,7 +281,7 @@ class BootstrapService
     {
         $value = $this->setting($settings, $key);
 
-        if (!is_string($value) || trim($value) === '') {
+        if (! is_string($value) || trim($value) === '') {
             return $default;
         }
 

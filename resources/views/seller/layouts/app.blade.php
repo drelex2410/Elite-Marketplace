@@ -7,8 +7,9 @@
     <title>@yield('title', translate('Seller dashboard')) | {{ config('app.name') }}</title>
     <link rel="stylesheet" href="{{ static_asset('assets/css/vendors.css') }}">
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
+    <link rel="stylesheet" href="{{ static_asset('assets/css/elite-brand.css') }}?v={{ filemtime(public_path('assets/css/elite-brand.css')) }}">
     <style>
-        :root { --seller-accent: #f5a000; --seller-dark: #111827; --seller-bg: #f7f8fb; }
+        :root { --seller-accent: #00d9cc; --seller-dark: #101c25; --seller-bg: #f5f7f9; }
         body { background: var(--seller-bg); color: #252936; }
         .seller-shell { min-height: 100vh; }
         .seller-topbar { height: 82px; background: #fff; border-bottom: 1px solid #e7e9ef; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 1030; }
@@ -38,16 +39,18 @@
         .seller-wide { grid-column: 1 / -1; margin-top: 24px; }
         .seller-chart { min-height: 220px; display: flex; align-items: end; gap: 7px; padding-top: 20px; }
         .seller-chart-bar { background: var(--seller-accent); min-width: 12px; flex: 1; border-radius: 4px 4px 0 0; opacity: .85; }
+        .seller-menu-toggle { display: none; }
         @media (max-width: 1200px) { .seller-grid, .seller-content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 768px) { .seller-topbar { height: auto; padding: 16px; flex-wrap: wrap; gap: 12px; } .seller-body { display: block; } .seller-sidebar { min-height: auto; } .seller-main { padding: 16px; } .seller-grid, .seller-content-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .seller-topbar { height: auto; padding: 12px 16px; gap: 10px; } .seller-topbar > div { gap: 8px !important; } .seller-topbar .btn { padding: 8px 10px; } .seller-topbar form, .seller-topbar > div > span { display: none; } .seller-menu-toggle { display: inline-flex; align-items: center; justify-content: center; } .seller-body { display: block; } .seller-sidebar { display: none; min-height: auto; border-bottom: 1px solid #e7e9ef; } .seller-sidebar.is-open { display: block; } .seller-main { padding: 16px; } .seller-grid, .seller-content-grid { grid-template-columns: 1fr; } }
     </style>
     @stack('styles')
 </head>
 <body>
 <div class="seller-shell">
     <header class="seller-topbar">
-        <a class="seller-brand" href="{{ route('seller.dashboard') }}"><span>ELITE</span> MARKETPLACE</a>
+        <a class="seller-brand" href="{{ route('seller.dashboard') }}"><img class="seller-brand-logo" src="{{ static_asset('assets/brand/elite-group-mark.png') }}" alt="Elite Group Cooperative Society Ltd"></a>
         <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-secondary seller-menu-toggle" type="button" aria-expanded="false" aria-controls="seller-sidebar"><i class="las la-bars"></i><span class="sr-only">{{ translate('Toggle seller navigation') }}</span></button>
             <a class="btn btn-outline-secondary" href="{{ route('home') }}">{{ translate('Browse Website') }}</a>
             <span class="font-weight-bold">{{ auth()->user()->name }}</span>
             <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-light" type="submit">{{ translate('Logout') }}</button></form>
@@ -68,5 +71,16 @@
 @yield('modal')
 @yield('script')
 @stack('scripts')
+<script>
+    (function () {
+        var button = document.querySelector('.seller-menu-toggle');
+        var sidebar = document.getElementById('seller-sidebar');
+        if (!button || !sidebar) return;
+        button.addEventListener('click', function () {
+            var open = sidebar.classList.toggle('is-open');
+            button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    })();
+</script>
 </body>
 </html>

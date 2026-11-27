@@ -2,15 +2,15 @@
 
 @section('content')
 
-<div class="h-100 bg-cover bg-center py-5 d-flex align-items-center" style="background-image: url({{ uploaded_asset(get_setting('admin_login_background')) }})">
+<div class="h-100 py-5 d-flex align-items-center elite-auth-shell">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 col-xl-4 mx-auto">
-                <div class="card text-left bg-transparent">
+                <div class="card text-left bg-transparent elite-auth-card">
                     <div class="absolute-full bg-white opacity-70"></div>
                     <div class="card-body position-relative z-1">
                         <div class="mb-4 text-center">
-                            <img src="{{ uploaded_asset(get_setting('system_logo_black')) }}" class="mw-100 mb-4" height="40">
+                            <img src="{{ static_asset('assets/brand/elite-group-logo.png') }}" class="elite-auth-logo mx-auto mb-4" alt="Elite Group Cooperative Society Ltd">
                             <h1 class="h3 text-primary mb-0 border-top text-uppercase pt-3" style="border-color: #fff !important">{{ translate('Welcome') }}</h1>
                             <p class="fs-15 opacity-80">{{ translate('Login to your account.') }}</p>
                         </div>

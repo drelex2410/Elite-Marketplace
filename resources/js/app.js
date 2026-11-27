@@ -85,7 +85,7 @@ const bootstrapDefaults = {
         customer_login_with: "email",
         customer_otp_with: "disabled",
     },
-    primaryColor: "#000000",
+    primaryColor: "#00d9cc",
 };
 
 function mergeBootstrap(payload = {}) {

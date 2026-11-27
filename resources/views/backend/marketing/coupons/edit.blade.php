@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
 
@@ -7,7 +7,7 @@
             <div class="card-header">
                 <h3 class="mb-0 h6">{{translate('Coupon Information Update')}}</h3>
             </div>
-            <form action="{{ route('coupon.update', $coupon->id) }}" method="POST">
+            <form action="{{ auth()->user()->user_type === 'seller' ? route('seller.coupons.update', $coupon->id) : route('coupon.update', $coupon->id) }}" method="POST">
                 <input name="_method" type="hidden" value="PATCH">
             	@csrf
                 <div class="card-body">
@@ -46,7 +46,7 @@
     function coupon_form(){
         var coupon_type = $('#coupon_type').val();
         var id = $('#id').val();
-		$.post('{{ route('coupon.get_coupon_form_edit') }}',{_token:'{{ csrf_token() }}', coupon_type:coupon_type, id:id}, function(data){
+		$.post('{{ auth()->user()->user_type === 'seller' ? route('seller.coupons.get_coupon_form_edit') : route('coupon.get_coupon_form_edit') }}',{_token:'{{ csrf_token() }}', coupon_type:coupon_type, id:id}, function(data){
             $('#coupon_form').html(data);
 		});
     }

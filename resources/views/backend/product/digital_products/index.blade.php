@@ -1,15 +1,15 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
 
 <div class="aiz-titlebar text-left mt-2 mb-3">
-    @can('add_digital_product')
+    @if (auth()->user()->user_type === 'seller' || auth()->user()->can('add_digital_product'))
 		<div class="text-md-right">
-			<a href="{{ route('digitalproducts.create') }}" class="btn btn-circle btn-info">
+			<a href="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.create') : route('digitalproducts.create') }}" class="btn btn-circle btn-info">
 				<span>{{translate('Add New Digital Product')}}</span>
 			</a>
 		</div>
-    @endcan
+    @endif
 </div>
 
 
@@ -80,30 +80,36 @@
                             <img src="{{ uploaded_asset($product->thumbnail_img)}}" alt="Image" class="w-50px">
                         </td>
                         <td>{{ number_format($product->highest_price,2) }}</td>
-                        
+
                         <td>
                             <label class="aiz-switch aiz-switch-success mb-0">
                                 <input onchange="update_published(this)" value="{{ $product->id }}" type="checkbox" <?php if($product->published == 1) echo "checked";?> >
                                 <span class="slider round"></span>
                             </label>
                         </td>
-                       
+
                         <td >
-                           
-                                <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{route('digitalproducts.edit', $product->id )}}" title="{{ translate('Edit') }}">
+
+                                <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.edit', $product->id) : route('digitalproducts.edit', $product->id) }}" title="{{ translate('Edit') }}">
                                     <i class="las la-edit"></i>
                                 </a>
-                           
-                            
-                                <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete" data-href="{{route('digitalproducts.destroy', $product->id)}}" title="{{ translate('Delete') }}">
-                                    <i class="las la-trash"></i>
-                                </a>                               
-                            
-                           
-                                <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{route('digitalproducts.download', encrypt($product->id))}}" title="{{ translate('Download') }}">
+
+
+                                @if (auth()->user()->user_type === 'seller')
+                                    <form action="{{ route('seller.digitalproducts.destroy', $product->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ translate('Are you sure to delete this?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-soft-danger btn-icon btn-circle btn-sm" type="submit" title="{{ translate('Delete') }}"><i class="las la-trash"></i></button>
+                                    </form>
+                                @else
+                                    <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete" data-href="{{ route('digitalproducts.destroy', $product->id) }}" title="{{ translate('Delete') }}"><i class="las la-trash"></i></a>
+                                @endif
+
+
+                                <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.download', encrypt($product->id)) : route('digitalproducts.download', encrypt($product->id)) }}" title="{{ translate('Download') }}">
                                     <i class="las la-download"></i>
                                 </a>
-                            
+
                         </td>
                     </tr>
                 @endforeach
@@ -135,14 +141,14 @@ $(document).on("change", ".check-all", function() {
             if(this.checked) {
                 // Iterate each checkbox
                 $('.check-one:checkbox').each(function() {
-                    this.checked = true;                        
+                    this.checked = true;
                 });
             } else {
                 $('.check-one:checkbox').each(function() {
-                    this.checked = false;                       
+                    this.checked = false;
                 });
             }
-          
+
         });
 
         function bulk_delete() {
@@ -151,7 +157,7 @@ $(document).on("change", ".check-all", function() {
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: "{{route('bulk-product-delete')}}",
+                url: "{{ auth()->user()->user_type === 'seller' ? route('seller.bulk-product-delete') : route('bulk-product-delete') }}",
                 type: 'POST',
                 data: data,
                 cache: false,
@@ -177,7 +183,7 @@ $(document).on("change", ".check-all", function() {
             else{
                 var status = 0;
             }
-            $.post('{{ route('product.published') }}', {_token:'{{ csrf_token() }}', id:el.value, status:status}, function(data){
+            $.post('{{ auth()->user()->user_type === 'seller' ? route('seller.product.published') : route('product.published') }}', {_token:'{{ csrf_token() }}', id:el.value, status:status}, function(data){
                 if(data == 1){
                     AIZ.plugins.notify('success', '{{ translate('Published products updated successfully') }}');
                 }
@@ -187,6 +193,6 @@ $(document).on("change", ".check-all", function() {
             });
         }
 
-      
+
     </script>
 @endsection

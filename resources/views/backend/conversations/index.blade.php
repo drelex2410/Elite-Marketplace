@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
 <div class="aiz-titlebar text-left mt-2 mb-3">
@@ -49,7 +49,7 @@
                                             <div class="row no-gutters">
                                                 <div class="col">
                                                     <h6 class="mt-0">
-                                                        <a href="{{ route('querries.show', encrypt($conversation->id)) }}" class="text-dark fw-600">
+                                                        <a href="{{ auth()->user()->user_type === 'seller' ? route('seller.querries.show', encrypt($conversation->id)) : route('querries.show', encrypt($conversation->id)) }}" class="text-dark fw-600">
                                                             {{ $conversation->title }}
                                                         </a>
                                                         @if ((Auth::user()->id == $conversation->sender_id && $conversation->sender_viewed == 0) || (Auth::user()->id == $conversation->receiver_id && $conversation->receiver_viewed == 0))

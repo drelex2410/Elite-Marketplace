@@ -2,17 +2,11 @@
     <div class="aiz-sidebar left c-scrollbar">
         <div class="aiz-side-nav-logo-wrap">
             <a href="{{ route('admin.dashboard') }}" class="d-block text-left">
-                @if (get_setting('system_logo_white') != null)
-                    <img class="mw-100" src="{{ uploaded_asset(get_setting('system_logo_white')) }}"
-                        class="brand-icon" alt="{{ get_setting('site_name') }}">
-                @else
-                    <img class="mw-100" src="{{ static_asset('assets/img/logo-white.png') }}"
-                        class="brand-icon" alt="{{ get_setting('site_name') }}">
-                @endif
+                <img class="elite-brand-logo" src="{{ static_asset('assets/brand/elite-group-logo.png') }}" alt="Elite Group Cooperative Society Ltd">
             </a>
         </div>
-    
-        
+
+
         <div class="aiz-side-nav-wrap">
 
                 <!-- side bar search -->
@@ -107,7 +101,7 @@
                                             {{  translate('Digital Products') }}
                                         </span>
                                     </a>
-                                </li>                                    
+                                </li>
                             @endcan
                             @if (addon_is_activated('multi_vendor'))
                                 @can('show_seller_products')
@@ -120,20 +114,20 @@
                                             <li class="aiz-side-nav-item">
                                                 <a href="{{ route('admin.seller_products.index','physical') }}" class="aiz-side-nav-link">
                                                     <span class="aiz-side-nav-text">{{ translate('Physical Products') }}</span>
-                                                  
+
                                                 </a>
                                             </li>
                                             <li class="aiz-side-nav-item">
                                                 <a href="{{ route('admin.seller_products.index','digital') }}" class="aiz-side-nav-link">
                                                     <span class="aiz-side-nav-text">{{ translate('Digital Products') }}</span>
-                                                  
+
                                                 </a>
                                             </li>
                                         </ul>
                                     </li>
                                 @endcan
                             @endif
-                            
+
                             @can('show_categories')
                                 <li class="aiz-side-nav-item">
                                     <a href="{{ route('categories.index') }}"
@@ -283,14 +277,14 @@
                             </a>
                             <ul class="aiz-side-nav-list level-2">
                                     @php
-                                        $sellers = \App\Models\Shop::where('verification_status', 0)->where('verification_info', '!=', null)->count();
+                                        $pendingSellerVerifications = \App\Models\Shop::where('verification_status', 0)->where('verification_info', '!=', null)->count();
                                     @endphp
                                 @can('show_sellers')
                                     <li class="aiz-side-nav-item">
                                         <a href="{{ route('admin.all_sellers') }}"
                                             class="aiz-side-nav-link {{ areActiveRoutes(['admin.seller.create', 'admin.seller.edit']) }}">
                                             <span class="aiz-side-nav-text">{{ translate('Sellers') }}</span>
-                                            @if($sellers > 0)<span class="badge badge-info">{{ $sellers }}</span> @endif
+                                            @if($pendingSellerVerifications > 0)<span class="badge badge-info">{{ $pendingSellerVerifications }}</span> @endif
                                         </a>
                                     </li>
                                 @endcan
@@ -299,7 +293,9 @@
                                         <a href="{{ route('admin.seller_product_reviews.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['admin.seller_product_reviews.index']) }}">
                                             <span class="aiz-side-nav-text">{{ translate('Product Reviews') }}</span>
                                             @if (\Illuminate\Support\Facades\Schema::hasColumn('products', 'review_status'))
-                                                @php($pendingProductReviews = \App\Models\Product::where('review_status', 'pending_approval')->count())
+                                                @php
+                                                    $pendingProductReviews = \App\Models\Product::where('review_status', 'pending_approval')->count();
+                                                @endphp
                                                 @if ($pendingProductReviews > 0)<span class="badge badge-warning">{{ $pendingProductReviews }}</span>@endif
                                             @endif
                                         </a>
@@ -457,7 +453,7 @@
                         </ul>
                     </li>
                 @endcan
-                
+
                 <!-- product query -->
                 @if (addon_is_activated('multi_vendor') && get_setting('conversation_system') == 1 && auth()->user()->can('product_query'))
                     @php
@@ -484,7 +480,7 @@
                     </li>
                 @endif
                 <!-- product query -->
-                
+
 
                 <!-- Uploaded Files -->
                 @can('show_uploaded_files')
@@ -576,7 +572,7 @@
                         </a>
                     </li>
                 @endcan
-                    
+
                  <!-- Offline Payment System -->
                  @canany(['affiliate_configuration','show_affiliate_users','show_referral_users','affiliate_withdraw_request','affiliate_log'])
                 @if ( get_setting('affiliate_system')==1)
@@ -595,7 +591,7 @@
                                 </g>
                             </svg>
                             <span class="aiz-side-nav-text">{{ translate('Affiliate System') }}</span>
-       
+
                             <span class="aiz-side-nav-arrow"></span>
                         </a>
                         <ul class="aiz-side-nav-list level-2">
@@ -707,7 +703,7 @@
                                   </a>
                               </li>
                               @endcan
-                              
+
                           </ul>
                       </li>
                   @endif

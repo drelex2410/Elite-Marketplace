@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
     <div class="aiz-titlebar text-left mt-2 mb-3">
@@ -6,7 +6,7 @@
     </div>
     <div class="row">
         <div class="col-lg-10 mx-auto">
-            <form class="form form-horizontal mar-top" action="{{ route('digitalproducts.update', $product->id) }}"
+            <form class="form form-horizontal mar-top" action="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.update', $product->id) : route('digitalproducts.update', $product->id) }}"
                 method="POST" enctype="multipart/form-data" id="choice_form">
                 <input name="_method" type="hidden" value="PATCH">
                 <input type="hidden" name="id" value="{{ $product->id }}">
@@ -18,7 +18,7 @@
                             @foreach (\App\Models\Language::all() as $key => $language)
                                 <li class="nav-item">
                                     <a class="nav-link text-reset @if ($language->code == $lang) active @else bg-soft-dark border-light border-left-0 @endif py-3"
-                                        href="{{ route('digitalproducts.edit', ['id' => $product->id, 'lang' => $language->code]) }}">
+                                        href="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.edit', ['digitalproduct' => $product->id, 'lang' => $language->code]) : route('digitalproducts.edit', ['digitalproduct' => $product->id, 'lang' => $language->code]) }}">
                                         <img src="{{ static_asset('assets/img/flags/' . $language->code . '.png') }}"
                                             height="11" class="mr-1">
                                         <span>{{ $language->name }}</span>

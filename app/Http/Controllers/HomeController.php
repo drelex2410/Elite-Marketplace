@@ -13,7 +13,6 @@ use App\Models\ManualPaymentMethod;
 use App\Models\Page;
 use App\Models\Product;
 use App\Services\Payments\AlatPay\AlatPayConfig;
-use Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Route;
@@ -84,15 +83,15 @@ class HomeController extends Controller
             'appName' => get_setting('site_name'),
             'appMetaTitle' => get_setting('meta_title'),
             'appMetaDescription' => get_setting('meta_description'),
-            'appLogo' => get_setting('header_logo') ? api_asset(get_setting('header_logo')) : static_asset('assets/img/logo.svg'),
+            'appLogo' => static_asset('assets/brand/elite-group-mark.png'),
             'appUrl' => getBaseURL(),
-            'demoMode' => env('DEMO_MODE') == "On" ? true : false,
+            'demoMode' => env('DEMO_MODE') == 'On' ? true : false,
             'cacheVersion' => get_setting('force_cache_clear_version'),
             'appLanguage' => env('DEFAULT_LANGUAGE'),
             'allLanguages' => Language::where('status', 1)->get(['name', 'code', 'flag', 'rtl']),
             'allCurrencies' => Currency::where('status', 1)->get(['id', 'name', 'symbol', 'code', 'exchange_rate']),
             'availableCountries' => Country::where('status', 1)->pluck('code')->toArray(),
-            'primaryColor' => get_setting('base_color', '#000'),
+            'primaryColor' => '#00d9cc',
             'shop_registration_message' => [
                 'shop_registration_message_title' => str_replace('&amp;', '&', str_replace('&nbsp;', ' ', strip_tags(get_setting('shop_registration_message_title')))),
                 'shop_registration_message_content' => str_replace('&amp;', '&', str_replace('&nbsp;', ' ', strip_tags(get_setting('shop_registration_message_content')))),
@@ -106,97 +105,97 @@ class HomeController extends Controller
                     'status' => get_setting('paypal_payment'),
                     'code' => 'paypal',
                     'name' => 'Paypal',
-                    'img' => static_asset("assets/img/cards/paypal.png")
+                    'img' => static_asset('assets/img/cards/paypal.png'),
                 ],
                 [
                     'status' => get_setting('stripe_payment'),
                     'code' => 'stripe',
                     'name' => 'Stripe',
-                    'img' => static_asset("assets/img/cards/stripe.png")
+                    'img' => static_asset('assets/img/cards/stripe.png'),
                 ],
                 [
                     'status' => get_setting('sslcommerz_payment'),
                     'code' => 'sslcommerz',
                     'name' => 'SSLCommerz',
-                    'img' => static_asset("assets/img/cards/sslcommerz.png")
+                    'img' => static_asset('assets/img/cards/sslcommerz.png'),
                 ],
                 [
                     'status' => get_setting('paystack_payment'),
                     'code' => 'paystack',
                     'name' => 'Paystack',
-                    'img' => static_asset("assets/img/cards/paystack.png")
+                    'img' => static_asset('assets/img/cards/paystack.png'),
                 ],
                 [
                     'status' => get_setting('flutterwave_payment'),
                     'code' => 'flutterwave',
                     'name' => 'Flutterwave',
-                    'img' => static_asset("assets/img/cards/flutterwave.png")
+                    'img' => static_asset('assets/img/cards/flutterwave.png'),
                 ],
                 [
                     'status' => get_setting('razorpay_payment'),
                     'code' => 'razorpay',
                     'name' => 'Razorpay',
-                    'img' => static_asset("assets/img/cards/razorpay.png")
+                    'img' => static_asset('assets/img/cards/razorpay.png'),
                 ],
                 [
                     'status' => get_setting('paytm_payment'),
                     'code' => 'paytm',
                     'name' => 'Paytm',
-                    'img' => static_asset("assets/img/cards/paytm.png")
+                    'img' => static_asset('assets/img/cards/paytm.png'),
                 ],
                 [
                     'status' => get_setting('payfast_payment'),
                     'code' => 'payfast',
                     'name' => 'Payfast',
-                    'img' => static_asset("assets/img/cards/payfast.png")
+                    'img' => static_asset('assets/img/cards/payfast.png'),
                 ],
                 [
                     'status' => get_setting('authorizenet_payment'),
                     'code' => 'authorizenet',
                     'name' => translate('Authorize Net'),
-                    'img' => static_asset("assets/img/cards/authorizenet.png")
+                    'img' => static_asset('assets/img/cards/authorizenet.png'),
                 ],
                 [
                     'status' => get_setting('mercadopago_payment'),
                     'code' => 'mercadopago',
                     'name' => translate('Mercadopago'),
-                    'img' => static_asset("assets/img/cards/mercadopago.png")
+                    'img' => static_asset('assets/img/cards/mercadopago.png'),
                 ],
                 [
                     'status' => get_setting('iyzico_payment'),
                     'code' => 'iyzico',
                     'name' => translate('iyzico'),
-                    'img' => static_asset("assets/img/cards/iyzico.png")
+                    'img' => static_asset('assets/img/cards/iyzico.png'),
                 ],
                 [
                     'status' => get_setting('myfatoorah_payment'),
                     'code' => 'myfatoorah',
                     'name' => translate('myfatoorah'),
-                    'img' => static_asset("assets/img/cards/myfatoorah.png")
+                    'img' => static_asset('assets/img/cards/myfatoorah.png'),
                 ],
                 [
                     'status' => get_setting('phonepe_payment'),
                     'code' => 'phonepe',
                     'name' => translate('phonepe'),
-                    'img' => static_asset("assets/img/cards/phonepe.png")
+                    'img' => static_asset('assets/img/cards/phonepe.png'),
                 ],
                 [
                     'status' => get_setting('payhere_payment'),
                     'code' => 'payhere',
                     'name' => translate('payhere'),
-                    'img' => static_asset("assets/img/cards/payhere.png")
+                    'img' => static_asset('assets/img/cards/payhere.png'),
                 ],
                 [
                     'status' => (int) $alatPayConfig->enabled(),
                     'code' => 'alatpay',
                     'name' => 'ALATPay',
-                    'img' => static_asset("assets/img/cards/alatpay.svg")
+                    'img' => static_asset('assets/img/cards/alatpay.svg'),
                 ],
                 [
                     'status' => get_setting('cash_payment'),
                     'code' => 'cash_on_delivery',
                     'name' => translate('Cash on Delivery'),
-                    'img' => static_asset("assets/img/cards/cod.png")
+                    'img' => static_asset('assets/img/cards/cod.png'),
                 ],
             ],
             'offlinePaymentMethods' => [],
@@ -233,63 +232,63 @@ class HomeController extends Controller
                     'symbol_format' => get_setting('symbol_format'),
                     'no_of_decimals' => get_setting('no_of_decimals'),
                     'truncate_price' => get_setting('truncate_price'),
-                ]
+                ],
             ],
             'banners' => [
-                "login_page" => [
-                    "img" => api_asset(get_setting('login_page_banner')),
-                    "link" => get_setting('login_page_banner_link')
+                'login_page' => [
+                    'img' => api_asset(get_setting('login_page_banner')),
+                    'link' => get_setting('login_page_banner_link'),
                 ],
-                "delivery_boy_login_page" => [
-                    "img" => api_asset(get_setting('delivery_boy_login_page_banner')),
-                    "link" => get_setting('delivery_boy_login_page_banner_link')
+                'delivery_boy_login_page' => [
+                    'img' => api_asset(get_setting('delivery_boy_login_page_banner')),
+                    'link' => get_setting('delivery_boy_login_page_banner_link'),
                 ],
-                "registration_page" => [
-                    "img" => api_asset(get_setting('registration_page_banner')),
-                    "link" => get_setting('registration_page_banner_link')
+                'registration_page' => [
+                    'img' => api_asset(get_setting('registration_page_banner')),
+                    'link' => get_setting('registration_page_banner_link'),
                 ],
-                "forgot_page" => [
-                    "img" => api_asset(get_setting('forgot_page_banner')),
-                    "link" => get_setting('forgot_page_banner_link')
+                'forgot_page' => [
+                    'img' => api_asset(get_setting('forgot_page_banner')),
+                    'link' => get_setting('forgot_page_banner_link'),
                 ],
-                "listing_page" => [
-                    "img" => api_asset(get_setting('listing_page_banner')),
-                    "link" => get_setting('listing_page_banner_link')
+                'listing_page' => [
+                    'img' => api_asset(get_setting('listing_page_banner')),
+                    'link' => get_setting('listing_page_banner_link'),
                 ],
-                "product_page" => [
-                    "img" => api_asset(get_setting('product_page_banner')),
-                    "link" => get_setting('product_page_banner_link')
+                'product_page' => [
+                    'img' => api_asset(get_setting('product_page_banner')),
+                    'link' => get_setting('product_page_banner_link'),
                 ],
-                "checkout_page" => [
-                    "img" => api_asset(get_setting('checkout_page_banner')),
-                    "link" => get_setting('checkout_page_banner_link')
+                'checkout_page' => [
+                    'img' => api_asset(get_setting('checkout_page_banner')),
+                    'link' => get_setting('checkout_page_banner_link'),
                 ],
-                "dashboard_page_top" => [
-                    "img" => api_asset(get_setting('dashboard_page_top_banner')),
-                    "link" => get_setting('dashboard_page_top_banner_link')
+                'dashboard_page_top' => [
+                    'img' => api_asset(get_setting('dashboard_page_top_banner')),
+                    'link' => get_setting('dashboard_page_top_banner_link'),
                 ],
-                "dashboard_page_bottom" => [
-                    "img" => api_asset(get_setting('dashboard_page_bottom_banner')),
-                    "link" => get_setting('dashboard_page_bottom_banner_link')
+                'dashboard_page_bottom' => [
+                    'img' => api_asset(get_setting('dashboard_page_bottom_banner')),
+                    'link' => get_setting('dashboard_page_bottom_banner_link'),
                 ],
-                "all_shops_page" => [
-                    "img" => api_asset(get_setting('all_shops_page_banner')),
-                    "link" => get_setting('all_shops_page_banner_link')
+                'all_shops_page' => [
+                    'img' => api_asset(get_setting('all_shops_page_banner')),
+                    'link' => get_setting('all_shops_page_banner_link'),
                 ],
-                "shop_registration_page" => [
-                    "img" => api_asset(get_setting('shop_registration_page_banner')),
-                    "link" => get_setting('shop_registration_page_banner_link')
+                'shop_registration_page' => [
+                    'img' => api_asset(get_setting('shop_registration_page_banner')),
+                    'link' => get_setting('shop_registration_page_banner_link'),
                 ],
             ],
             'refundSettings' => [
                 'refund_request_time_period' => get_setting('refund_request_time_period') * 86400,
                 'refund_request_order_status' => json_decode(get_setting('refund_request_order_status')),
-                'refund_reason_types' => json_decode(get_setting('refund_reason_types'))
+                'refund_reason_types' => json_decode(get_setting('refund_reason_types')),
             ],
             'authSettings' => [
                 'customer_login_with' => get_setting('customer_login_with'),
                 'customer_otp_with' => get_setting('customer_otp_with'),
-            ]
+            ],
         ];
 
         if (get_setting('offline_payment') == 1) {

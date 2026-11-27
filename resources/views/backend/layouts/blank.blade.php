@@ -17,6 +17,7 @@
     <!-- aiz core css -->
     <link rel="stylesheet" href="{{ static_asset('assets/css/vendors.css') }}">
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
+    <link rel="stylesheet" href="{{ static_asset('assets/css/elite-brand.css') }}?v={{ filemtime(public_path('assets/css/elite-brand.css')) }}">
 
     <script>
         var AIZ = AIZ || {};
