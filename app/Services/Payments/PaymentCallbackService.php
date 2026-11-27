@@ -7,8 +7,10 @@ use App\Models\ManualPaymentMethod;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
+use App\Models\SellerPackage;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\Sellers\SellerPackageActivationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +41,7 @@ class PaymentCallbackService
 
         $redirect = $payment
             ? $this->redirectUrlFor($payment, 'failed', $gateway)
-            : url('/') . '?' . http_build_query(['payment' => 'failed', 'payment_method' => $gateway]);
+            : url('/').'?'.http_build_query(['payment' => 'failed', 'payment_method' => $gateway]);
 
         $this->clearSession();
 
@@ -61,6 +63,8 @@ class PaymentCallbackService
                 $this->markOrderPaymentAsPaid($payment, $gateway, $details);
             } elseif ($payment->payment_type === 'wallet_payment') {
                 $this->markWalletPaymentAsPaid($payment, $gateway, $details);
+            } elseif ($payment->payment_type === 'seller_package_payment') {
+                $this->activateSellerPackage($payment, $gateway, $details);
             }
 
             $payment->update([
@@ -106,6 +110,10 @@ class PaymentCallbackService
                 $this->createPendingWalletRecharge($payment, $transactionId, $receipt);
             }
 
+            if ($payment->payment_type === 'seller_package_payment') {
+                $this->createPendingSellerPackagePayment($payment, $transactionId, $receipt);
+            }
+
             if (in_array($payment->payment_type, ['cart_payment', 'repayment'], true) && Str::contains($payment->gateway, 'offline_payment')) {
                 $this->storePendingManualOrderPayment($payment, $transactionId, $receipt);
             }
@@ -132,7 +140,7 @@ class PaymentCallbackService
     {
         $paymentId = session('payment_id');
 
-        if (!$paymentId) {
+        if (! $paymentId) {
             if ($strict) {
                 throw new HttpException(422, 'Payment session has expired.');
             }
@@ -142,7 +150,7 @@ class PaymentCallbackService
 
         $payment = Payment::query()->find($paymentId);
 
-        if (!$payment && $strict) {
+        if (! $payment && $strict) {
             throw new HttpException(404, 'Payment record not found.');
         }
 
@@ -153,7 +161,7 @@ class PaymentCallbackService
     {
         $normalizedPayload = $this->normalizePayload($payload);
         $reference = $this->extractReference($payload);
-        $fingerprint = sha1($payment->id . '|' . $gateway . '|' . $eventType . '|' . ($reference ?: json_encode($normalizedPayload)));
+        $fingerprint = sha1($payment->id.'|'.$gateway.'|'.$eventType.'|'.($reference ?: json_encode($normalizedPayload)));
 
         return PaymentTransaction::query()->firstOrCreate(
             ['fingerprint' => $fingerprint],
@@ -173,7 +181,7 @@ class PaymentCallbackService
     {
         $combinedOrder = $payment->combinedOrder ?: CombinedOrder::query()->with('orders')->where('code', $payment->order_code)->first();
 
-        if (!$combinedOrder) {
+        if (! $combinedOrder) {
             throw new HttpException(404, 'Order not found for payment.');
         }
 
@@ -202,7 +210,7 @@ class PaymentCallbackService
 
         $user->increment('balance', (float) $payment->amount);
 
-        $wallet = new Wallet();
+        $wallet = new Wallet;
         $wallet->user_id = $user->id;
         $wallet->amount = $payment->amount;
         $wallet->payment_method = $gateway;
@@ -214,20 +222,54 @@ class PaymentCallbackService
         $wallet->save();
     }
 
+    private function activateSellerPackage(Payment $payment, string $gateway, mixed $details): void
+    {
+        $packageId = (int) data_get($payment->meta, 'seller_package_id');
+        $seller = User::query()->findOrFail($payment->user_id);
+        $package = SellerPackage::query()->findOrFail($packageId);
+        $reference = $this->extractReference($details) ?: 'payment-'.$payment->id;
+
+        app(SellerPackageActivationService::class)->activate(
+            $seller,
+            $package,
+            'seller-package-payment:'.$payment->id,
+            $gateway,
+            $reference,
+            $this->normalizePayload($details)
+        );
+    }
+
+    private function createPendingSellerPackagePayment(Payment $payment, ?string $transactionId, ?UploadedFile $receipt): void
+    {
+        $packageId = (int) data_get($payment->meta, 'seller_package_id');
+        $seller = User::query()->findOrFail($payment->user_id);
+        $package = SellerPackage::query()->findOrFail($packageId);
+        $reference = $transactionId ?: 'offline-payment-'.$payment->id;
+        $storedReceipt = $receipt?->store('uploads/offline_payments');
+
+        app(SellerPackageActivationService::class)->createOfflinePending(
+            $seller,
+            $package,
+            $reference,
+            $payment->gateway,
+            $storedReceipt
+        );
+    }
+
     private function createPendingWalletRecharge(Payment $payment, ?string $transactionId, ?UploadedFile $receipt): void
     {
         $segments = explode('-', $payment->gateway);
         $offlinePaymentId = (int) end($segments);
         $method = ManualPaymentMethod::query()->find($offlinePaymentId);
 
-        $wallet = new Wallet();
+        $wallet = new Wallet;
         $wallet->user_id = $payment->user_id;
         $wallet->amount = $payment->amount;
         $wallet->payment_details = $transactionId;
         $wallet->approval = 0;
         $wallet->offline_payment = 1;
         $wallet->payment_method = $method?->heading;
-        $wallet->details = $method?->heading ? 'Paid via ' . $method->heading . ' for recharge' : 'Offline recharge';
+        $wallet->details = $method?->heading ? 'Paid via '.$method->heading.' for recharge' : 'Offline recharge';
         $wallet->type = 'Pending';
 
         if ($receipt && Schema::hasColumn('wallets', 'reciept')) {
@@ -241,7 +283,7 @@ class PaymentCallbackService
     {
         $combinedOrder = CombinedOrder::query()->with('orders')->where('code', $payment->order_code)->first();
 
-        if (!$combinedOrder) {
+        if (! $combinedOrder) {
             return;
         }
 
@@ -251,7 +293,7 @@ class PaymentCallbackService
         $storedReceipt = $receipt?->store('uploads/offline_payments');
 
         foreach ($combinedOrder->orders as $order) {
-            if (!Schema::hasColumn('orders', 'manual_payment') || !Schema::hasColumn('orders', 'manual_payment_data')) {
+            if (! Schema::hasColumn('orders', 'manual_payment') || ! Schema::hasColumn('orders', 'manual_payment_data')) {
                 continue;
             }
 
@@ -277,7 +319,7 @@ class PaymentCallbackService
             $query['order_code'] = $payment->order_code;
         }
 
-        return $payment->redirect_to . '?' . http_build_query($query);
+        return $payment->redirect_to.'?'.http_build_query($query);
     }
 
     private function clearSession(): void

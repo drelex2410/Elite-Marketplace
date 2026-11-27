@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
 
@@ -8,7 +8,7 @@
                 <h5 class="mb-0 h6">{{translate('Coupon Information Adding')}}</h5>
             </div>
             <div class="card-body">
-              <form class="form-horizontal" action="{{ route('coupon.store') }}" method="POST" enctype="multipart/form-data">
+              <form class="form-horizontal" action="{{ auth()->user()->user_type === 'seller' ? route('seller.coupons.store') : route('coupon.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="form-group row">
                     <label class="col-lg-3 col-from-label" for="name">{{translate('Coupon Type')}}</label>
@@ -39,7 +39,7 @@
 
     function coupon_form(){
         var coupon_type = $('#coupon_type').val();
-		$.post('{{ route('coupon.get_coupon_form') }}',{_token:'{{ csrf_token() }}', coupon_type:coupon_type}, function(data){
+		$.post('{{ auth()->user()->user_type === 'seller' ? route('seller.coupons.get_coupon_form') : route('coupon.get_coupon_form') }}',{_token:'{{ csrf_token() }}', coupon_type:coupon_type}, function(data){
             $('#coupon_form').html(data);
 		});
     }

@@ -27,6 +27,6 @@ if(get_setting('offline_payment') == 1){
 
         // Seller Package purchase request
         Route::get('/offline-seller-package-payment-requests', [SellerPackagePaymentController::class, 'offline_payment_request'])->name('offline_seller_package_payment_request.index');
-        Route::get('/offline-seller-package-payment/approved/{id}', [SellerPackagePaymentController::class, 'offline_payment_approval'])->name('offline_seller_package_payment.approved');
+        Route::post('/offline-seller-package-payment/approved/{id}', [SellerPackagePaymentController::class, 'offline_payment_approval'])->name('offline_seller_package_payment.approved');
     }); 
 }

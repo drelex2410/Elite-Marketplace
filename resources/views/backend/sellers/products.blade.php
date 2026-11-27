@@ -1,0 +1,4 @@
+@extends('backend.layouts.app')
+@section('content')
+<div class="aiz-titlebar text-left mt-2 mb-3"><h1 class="h3">{{ translate('Seller Products') }} — {{ ucfirst($product_type) }}</h1></div><div class="card"><div class="card-body"><div class="table-responsive"><table class="table aiz-table"><thead><tr><th>{{ translate('Product') }}</th><th>{{ translate('Shop') }}</th><th>{{ translate('Review') }}</th><th>{{ translate('Published') }}</th></tr></thead><tbody>@forelse($products as $product)<tr><td>{{ $product->name }}</td><td>{{ $product->shop?->name }}</td><td>{{ $product->review_status?->value ?? ($product->approved ? 'approved' : 'pending') }}</td><td>{{ $product->published ? translate('Yes') : translate('No') }}</td></tr>@empty<tr><td colspan="4" class="text-center">{{ translate('No seller products found.') }}</td></tr>@endforelse</tbody></table></div>{{ $products->links() }}</div></div>
+@endsection

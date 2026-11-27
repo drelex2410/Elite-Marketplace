@@ -148,7 +148,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary mt-2"
                         data-dismiss="modal">{{ translate('Cancel') }}</button>
-                    <a href="" id="accept_refund_request_link" class="btn btn-primary">{{ translate('Accept') }}</a>
+                    <form id="accept_refund_request_form" method="POST">@csrf<button type="submit" class="btn btn-primary">{{ translate('Accept') }}</button></form>
                 </div>
             </div>
         </div>
@@ -168,7 +168,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary mt-2"
                         data-dismiss="modal">{{ translate('Cancel') }}</button>
-                    <a href="" id="reject_refund_request_link" class="btn btn-primary">{{ translate('Reject') }}</a>
+                    <form id="reject_refund_request_form" method="POST">@csrf<button type="submit" class="btn btn-primary">{{ translate('Reject') }}</button></form>
                 </div>
             </div>
         </div>
@@ -195,12 +195,12 @@
 
         function accept_refund_request(url) {
             $('#accept_refund_request_modal').modal('show');
-            document.getElementById('accept_refund_request_link').setAttribute('href', url);
+            document.getElementById('accept_refund_request_form').setAttribute('action', url);
         }
 
         function reject_refund_request(url) {
             $('#reject_refund_request_modal').modal('show');
-            document.getElementById('reject_refund_request_link').setAttribute('href', url);
+            document.getElementById('reject_refund_request_form').setAttribute('action', url);
         }
     </script>
 @endsection

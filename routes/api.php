@@ -251,7 +251,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.'], function () {
 
 
     //for shops
-    Route::post('shop/register', V1ShopRegistrationController::class);
+    Route::post('shop/register', V1ShopRegistrationController::class)
+        ->middleware('throttle:seller-registration');
     Route::get('all-shops', [V1ShopController::class, 'index']);
     Route::get('shop/{slug}', [V1ShopController::class, 'show']);
     Route::get('shop/{slug}/home', [V1ShopController::class, 'home']);

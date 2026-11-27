@@ -10,16 +10,8 @@
             </button>
         </div>
         <div class="aiz-topbar-logo-wrap d-xl-none d-flex align-items-center justify-content-start">
-            @php
-                $logo = get_setting('header_logo');
-            @endphp
             <a href="{{ route('admin.dashboard') }}" class="d-block">
-                @if ($logo != null)
-                    <img src="{{ uploaded_asset($logo) }}" class="brand-icon" alt="{{ get_setting('site_name') }}">
-                @else
-                    <img src="{{ static_asset('assets/img/logo.png') }}" class="brand-icon"
-                        alt="{{ get_setting('site_name') }}">
-                @endif
+                <img src="{{ static_asset('assets/brand/elite-group-mark.png') }}" class="elite-brand-logo" alt="Elite Group Cooperative Society Ltd">
             </a>
         </div>
     </div>

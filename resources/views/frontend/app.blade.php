@@ -9,7 +9,7 @@
     <title>{!! $meta['meta_title'] !!}</title>
 
     <!-- Favicon -->
-    <link rel="icon" sizes="512x512" href="{{ uploaded_asset(get_setting('site_icon')) }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ static_asset('assets/brand/elite-group-icon.png') }}">
 
     <!-- meta -->
     <meta charset="utf-8">
@@ -48,6 +48,7 @@
     <!-- Styles & JS-->
     {{-- Active storefront entrypoint: this blade loads resources/js/app.js, which mounts resources/js/components/App.vue. --}}
     @vite(['resources/js/app.js'])
+    <link rel="stylesheet" href="{{ static_asset('assets/css/elite-brand.css') }}?v={{ filemtime(public_path('assets/css/elite-brand.css')) }}">
     {{-- @vite(["resources/sass/app.css", "resources/js/app.js"]) --}}
     {{-- {{ Vite::useBuildDirectory('bundle')->withEntryPoints(['resources/sass/app.scss', 'resources/js/app.js']) }} --}}
     {{-- @vite('resources/js/app.js') --}}
@@ -69,21 +70,9 @@
         }
 
         :root {
-            --primary: {
-                    {
-                    get_setting('base_color', '#e62d04')
-                }
-            }
-
-            ;
-
-            --soft-primary: {
-                    {
-                    hex2rgba(get_setting('base_color', '#e62d04'), 0.15)
-                }
-            }
-
-            ;
+            --primary: #00d9cc;
+            --hov-primary: #00b8ad;
+            --soft-primary: rgba(0, 217, 204, 0.15);
         }
     </style>
 

@@ -1,10 +1,10 @@
-@extends('backend.layouts.app')
+@extends(($sellerMode ?? false) ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
     <div class="aiz-titlebar text-left mt-2 mb-3">
         <h1 class="mb-0 h6">{{ translate('Edit Product') }}</h5>
     </div>
-    <form class="form form-horizontal mar-top" action="{{ route('product.update', $product->id) }}" method="POST"
+    <form class="form form-horizontal mar-top" action="{{ route(($sellerMode ?? false) ? 'seller.product.update' : 'product.update', $product->id) }}" method="POST"
         enctype="multipart/form-data" id="product_form">
         @csrf
         <input type="hidden" name="id" value="{{ $product->id }}">
@@ -13,7 +13,7 @@
             @foreach (\App\Models\Language::where('status',1)->get() as $key => $language)
                 <li class="nav-item">
                     <a class="nav-link text-reset @if ($language->code == $lang) active @else bg-soft-dark border-light border-left-0 @endif py-3"
-                        href="{{ route('product.edit', ['id' => $product->id, 'lang' => $language->code]) }}">
+                        href="{{ route(($sellerMode ?? false) ? 'seller.products.edit' : 'product.edit', ['id' => $product->id, 'lang' => $language->code]) }}">
                         <img src="{{ static_asset('assets/img/flags/' . $language->flag . '.png') }}" height="11"
                             class="mr-1">
                         <span>{{ $language->name }}</span>
@@ -185,7 +185,7 @@
                                     <div class="form-group row gutters-10 ">
                                         <div class="col-xxl-3 col-xl-4 col-md-5 attr-names">
                                             <select class="form-control aiz-selectpicker" name="product_options[]"
-                                                onchange="get_option_choices(this)" data-live-search="true"
+                                                data-live-search="true"
                                                 title="{{ translate('Select an option') }}"
                                                 data-selected="{{ $combination['id'] }}">
                                                 @foreach ($all_attributes as $attribute)
@@ -231,7 +231,7 @@
                                     <div class="form-group row gutters-10 ">
                                         <div class="col-xxl-3 col-xl-4 col-md-5 attr-names">
                                             <select class="form-control aiz-selectpicker" name="product_options[]"
-                                                onchange="get_option_choices(this)" data-live-search="true"
+                                                data-live-search="true"
                                                 title="{{ translate('Select an option') }}">
                                                 @foreach ($all_attributes as $key => $attribute)
                                                     <option value="{{ $attribute->id }}">
@@ -515,11 +515,17 @@
                         <h5 class="mb-0 h6">{{ translate('Product Status') }}</h5>
                     </div>
                     <div class="card-body">
-                        <select class="form-control aiz-selectpicker" name="status"
-                            data-selected="{{ $product->published }}">
-                            <option value="0">{{ translate('Draft') }}</option>
-                            <option value="1" selected>{{ translate('Published') }}</option>
-                        </select>
+                        @if ($sellerMode ?? false)
+                            <input type="hidden" name="status" value="0">
+                            <p class="mb-1"><strong>{{ translate('Review status') }}:</strong> {{ str_replace('_', ' ', $product->review_status?->value ?? (string) $product->review_status) }}</p>
+                            @if ($product->review_reason)<p class="mb-0 text-danger">{{ $product->review_reason }}</p>@endif
+                            <small class="text-muted">{{ translate('Material edits require a new review and temporarily unpublish an approved product.') }}</small>
+                        @else
+                            <select class="form-control aiz-selectpicker" name="status" data-selected="{{ $product->published }}">
+                                <option value="0">{{ translate('Draft') }}</option>
+                                <option value="1" selected>{{ translate('Published') }}</option>
+                            </select>
+                        @endif
                     </div>
                 </div>
                 <div class="card">
@@ -710,8 +716,12 @@
             </div>
         </div>
         <div class="mar-all text-right mb-3">
-            <button type="submit" class="btn btn-primary"
-                id="upload-product">{{ translate('Update Product') }}</button>
+            @if ($sellerMode ?? false)
+                <button type="submit" name="review_action" value="draft" class="btn btn-light">{{ translate('Save Draft') }}</button>
+                <button type="submit" name="review_action" value="submit" class="btn btn-primary" id="upload-product">{{ translate('Submit for Review') }}</button>
+            @else
+                <button type="submit" class="btn btn-primary" id="upload-product">{{ translate('Update Product') }}</button>
+            @endif
         </div>
     </form>
 
@@ -759,7 +769,7 @@
             $.ajax({
                 type: "POST",
                 data: $('#product_form').serialize(),
-                url: '{{ route('product.new_attribute') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.new_attribute' : 'product.new_attribute') }}',
                 success: function(data) {
                     if (data.count == -1) {
                         AIZ.plugins.notify('warning', '{{ translate('Please select an attribute.') }}');
@@ -784,19 +794,30 @@
                 data: {
                     attribute_id: $(e).val()
                 },
-                url: '{{ route('product.get_attribute_values') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.get_attribute_values' : 'product.get_attribute_values') }}',
                 success: function(data) {
                     $(e).closest('.row').find('.attr-values').html(data);
                     AIZ.plugins.bootstrapSelect();
+                },
+                error: function() {
+                    AIZ.plugins.notify('danger', '{{ translate('Unable to load option values. Please refresh and try again.') }}');
                 }
             });
         }
+
+        $(document).on('change changed.bs.select', 'select[name="product_options[]"]', function() {
+            var select = this;
+            clearTimeout($(select).data('option-load-timer'));
+            $(select).data('option-load-timer', setTimeout(function() {
+                if ($(select).val()) get_option_choices(select);
+            }, 0));
+        });
 
         function add_new_option() {
             $.ajax({
                 type: "POST",
                 data: $('#product_form').serialize(),
-                url: '{{ route('product.new_option') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.new_option' : 'product.new_option') }}',
                 success: function(data) {
                     if (data.count == -2) {
                         AIZ.plugins.notify('warning', '{{ translate('Maximum option limit reached.') }}');
@@ -823,7 +844,7 @@
                 data: {
                     attribute_id: $(e).val()
                 },
-                url: '{{ route('product.get_option_choices') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.get_option_choices' : 'product.get_option_choices') }}',
                 success: function(data) {
                     $(e).closest('.row').find('.attr-values').html(data);
                     AIZ.plugins.bootstrapSelect();
@@ -834,7 +855,7 @@
         function update_sku() {
             $.ajax({
                 type: "POST",
-                url: '{{ route('product.sku_combination') }}',
+                url: '{{ route(($sellerMode ?? false) ? 'seller.product.sku_combination' : 'product.sku_combination') }}',
                 data: $('#product_form').serialize(),
                 success: function(data) {
                     $('#sku_combination').html(data);

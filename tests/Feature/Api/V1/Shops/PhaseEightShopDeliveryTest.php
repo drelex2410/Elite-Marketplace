@@ -118,8 +118,17 @@ class PhaseEightShopDeliveryTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonPath('message', 'Thanks for registering your shop.');
 
-        $this->assertDatabaseHas('users', ['email' => 'seller@example.com', 'user_type' => 'seller']);
-        $this->assertDatabaseHas('shops', ['name' => 'Seller Shop', 'verification_status' => 0]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'seller@example.com',
+            'user_type' => 'seller',
+            'email_verified_at' => null,
+        ]);
+        $this->assertDatabaseHas('shops', [
+            'name' => 'Seller Shop',
+            'approval' => 0,
+            'published' => 0,
+            'verification_status' => 0,
+        ]);
     }
 
     public function test_delivery_dashboard_requires_delivery_boy_auth(): void

@@ -665,8 +665,10 @@ export default {
 }
 
 .logo-img {
-  height: 40px;
-  filter: var(--header-logo-filter);
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  filter: none;
   transition: height 0.3s ease, filter var(--header-transition);
 }
 

@@ -76,7 +76,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-link mt-2" data-dismiss="modal">{{translate('Cancel')}}</button>
-                <a href="" id="approve-link" class="btn btn-primary mt-2">{{translate('Yes, Approve')}}</a>
+                <form method="POST" id="approve-form" action="">@csrf<button type="submit" class="btn btn-primary mt-2">{{translate('Yes, Approve')}}</button></form>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@
     <script type="text/javascript">
         function offline_payment_approval(url){
             $("#payment-approval-modal").modal("show");
-            $("#approve-link").attr("href", url);
+            $("#approve-form").attr("action", url);
         }
     </script>
 @endsection

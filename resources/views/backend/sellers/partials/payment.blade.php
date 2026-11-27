@@ -1,0 +1,1 @@
+<div><h5>{{ translate('Seller payout details') }}</h5><p>{{ $seller->shop?->bank_name }}<br>{{ $seller->shop?->bank_acc_name }}<br>{{ $seller->shop?->bank_acc_no }}</p><p><strong>{{ translate('Available balance') }}:</strong> {{ format_price($seller->shop?->current_balance ?? 0) }}</p></div>

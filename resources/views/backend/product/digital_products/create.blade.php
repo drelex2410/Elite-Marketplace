@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
     <div class="aiz-titlebar text-left mt-2 mb-3">
@@ -6,10 +6,10 @@
     </div>
     <div class="row">
         <div class="col-lg-10 mx-auto">
-            <form class="form form-horizontal mar-top" action="{{ route('digitalproducts.store') }}" method="POST"
+            <form class="form form-horizontal mar-top" action="{{ auth()->user()->user_type === 'seller' ? route('seller.digitalproducts.store') : route('digitalproducts.store') }}" method="POST"
                 enctype="multipart/form-data" id="choice_form">
                 @csrf
-                <input type="hidden" name="added_by" value="admin">
+                <input type="hidden" name="added_by" value="{{ auth()->user()->user_type }}">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0 h6">{{ translate('General') }}</h5>

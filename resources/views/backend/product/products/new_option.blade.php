@@ -1,6 +1,6 @@
 <div class="form-group row gutters-10">
     <div class="col-xxl-3 col-xl-4 col-md-5 attr-names">
-        <select class="form-control aiz-selectpicker" name="product_options[]" onchange="get_option_choices(this)" data-live-search="true" title="{{ translate('Select an option') }}">
+        <select class="form-control aiz-selectpicker" name="product_options[]" data-live-search="true" title="{{ translate('Select an option') }}">
             @foreach($attributes as $key => $attribute)
                 <option value="{{ $attribute->id }}">{{ $attribute->getTranslation('name') }}</option>
             @endforeach

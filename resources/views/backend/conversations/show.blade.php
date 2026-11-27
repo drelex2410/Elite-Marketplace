@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends(auth()->user()->user_type === 'seller' ? 'seller.layouts.app' : 'backend.layouts.app')
 
 @section('content')
   <div class="aiz-titlebar mt-2 mb-4">
@@ -46,7 +46,7 @@
                     </li>
                 @endforeach
             </ul>
-            <form class="pt-4" action="{{ route('querries.store') }}" method="POST">
+            <form class="pt-4" action="{{ auth()->user()->user_type === 'seller' ? route('seller.querries.store') : route('querries.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                 <div class="form-group">

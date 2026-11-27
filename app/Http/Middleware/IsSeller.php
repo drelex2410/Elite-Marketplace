@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class IsSeller
 {
@@ -18,11 +18,14 @@ class IsSeller
     {
         $shop = Auth::check() ? Auth::user()->shop : null;
 
-        if (Auth::check() && Auth::user()->user_type == 'seller' && $shop && $shop->approval == 1) {
-            return $next($request);
-        }
-        else{
+        if (! Auth::check() || Auth::user()->user_type !== 'seller' || ! $shop) {
             abort(404);
         }
+
+        if ((bool) Auth::user()->banned) {
+            abort(403, 'This seller account has been suspended.');
+        }
+
+        return $next($request);
     }
 }

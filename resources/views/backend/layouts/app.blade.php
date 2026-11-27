@@ -29,6 +29,7 @@
         <link rel="stylesheet" href="{{ static_asset('assets/css/bootstrap-rtl.min.css') }}">
     @endif
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
+    <link rel="stylesheet" href="{{ static_asset('assets/css/elite-brand.css') }}?v={{ filemtime(public_path('assets/css/elite-brand.css')) }}">
 
 
     <script>
@@ -59,7 +60,7 @@
 
 </head>
 
-<body class="">
+<body class="elite-admin">
     <div class="aiz-main-wrapper">
         @include('backend.inc.admin_sidenav')
         <div class="aiz-content-wrapper">
